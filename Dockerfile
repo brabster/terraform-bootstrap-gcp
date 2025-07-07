@@ -16,13 +16,7 @@ LABEL org.opencontainers.image.licenses="MIT"
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends gnupg lsb-release wget \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Google Cloud SDK
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
-    && wget -O- https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends google-cloud-cli \
+    && python -m pip install --upgrade pip setuptools \
     && rm -rf /var/lib/apt/lists/*
 
 ## https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
@@ -34,8 +28,26 @@ RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/s
     && terraform -install-autocomplete \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Google Cloud SDK
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
+    && wget -O- https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends google-cloud-cli \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN useradd -m vscode
 
 USER vscode
+
+WORKDIR /home/vscode
+
+# Pre-warm pip cache
+COPY requirements.txt .
+RUN VENV_PATH=$(mktemp -d) \
+    && python -m venv "$VENV_PATH" \
+    && . "$VENV_PATH"/bin/activate \
+    && pip install -r requirements.txt \
+    && rm -rf "$VENV_PATH" \
+    && rm requirements.txt
 
 CMD ["/bin/bash"]
