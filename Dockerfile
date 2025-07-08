@@ -13,29 +13,31 @@ LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.revision=$VCS_REF
 LABEL org.opencontainers.image.licenses="MIT"
 
+COPY scripts/apt_install_thirdparty /usr/local/bin/apt_install_thirdparty
+
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends gnupg lsb-release wget \
     && python -m pip install --upgrade pip setuptools \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && chmod +x /usr/local/bin/apt_install_thirdparty \
+    && useradd -m vscode
 
-## https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
-RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null \
-    && gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint \
-    && echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends terraform \
-    && terraform -install-autocomplete \
-    && rm -rf /var/lib/apt/lists/*
+# Terraform, maintained by HashiCorp
+RUN apt_install_thirdparty "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 
-# # Install Google Cloud SDK
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
-    && wget -O- https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends google-cloud-cli \
-    && rm -rf /var/lib/apt/lists/*
+# gcloud CLI, maintained by Google
+RUN apt_install_thirdparty "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main"
 
-RUN useradd -m vscode
+# osv-scanner, maintained by Google
+RUN TMP_DIR=$(mktemp -d) \
+    && cd $TMP_DIR \
+    && wget -q https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 \
+    && wget -q https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_SHA256SUMS \
+    && egrep 'osv-scanner_linux_amd64$' osv-scanner_SHA256SUMS | sha256sum --check \
+    && cp osv-scanner_linux_amd64 /usr/local/bin/osv-scanner \
+    && chmod +x /usr/local/bin/osv-scanner \
+    && rm -rf $TMP_DIR
 
 USER vscode
 

@@ -16,6 +16,8 @@
 - Trust for a dependency must be determined primarily based the methods described at https://snyk.io/advisor. Review the factors desribed there.
 - An overall package health score for an example Python package "mypackage" can be obtained from https://snyk.io/advisor/python/mypackage. Use this service to ensure that all packages have a package health score greater than 80.
 - Trusted maintainers and suppliers take responsibility for the transitive dependencies of their projects. Only direct dependencies need to be considered.
+- Each dependency must be annotated at point of inclusion with a comment declaring the maintaining party.
+- A list of all dependencies and maintaining parties must be called out in a README section.
 
 ## Changes
 
