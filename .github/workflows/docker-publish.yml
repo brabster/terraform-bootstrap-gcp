@@ -32,14 +32,38 @@ jobs:
           type=schedule,pattern={{date 'YYYY-MM-DD'}}
           type=raw,value=latest,enable={{is_default_branch}}
 
-    - name: Build and push Docker image
-      id: build-and-push
+    - name: Build and load Docker image
       uses: docker/build-push-action@v4
       with:
         context: .
-        push: true
+        load: true
+        push: false
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
           VCS_REF=${{ github.sha }}
           BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    - name: Verify image tools
+      run: |
+        docker run --rm ${{ fromJSON(steps.meta.outputs.json).tags[0] }} bash -c " \
+          set -e && \
+          echo '--- Checking Terraform ---' && terraform --version && \
+          echo '--- Checking gcloud ---' && gcloud --version && \
+          echo '--- Checking Python ---' && python --version \
+        "
+
+    - name: Push Docker image
+      run: |
+        echo "${{ steps.meta.outputs.tags }}" | sed 's/,/\n/g' | xargs -I {} docker push {}
+
+    - name: Save image to tarball on failure
+      if: failure()
+      run: docker save ${{ fromJSON(steps.meta.outputs.json).tags[0] }} -o image.tar
+
+    - name: Upload image artifact on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: failed-image-${{ github.run_id }}
+        path: image.tar
