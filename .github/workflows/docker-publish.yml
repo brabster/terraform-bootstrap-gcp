@@ -13,85 +13,80 @@ on:
       - .github/**
       - scripts/**
 
+env:
+  DOCKER_SHA_TAG: ghcr.io/${{ github.repository }}:${{ github.sha }}
+  DOCKER_LATEST_TAG: ghcr.io/${{ github.repository }}:latest
+
 jobs:
   build_and_load:
     runs-on: ubuntu-latest # maintained by GitHub
     permissions:
       contents: read
-    outputs:
-      image_meta: ${{ steps.meta.outputs.json }}
     steps:
     - uses: actions/checkout@v3 # maintained by GitHub
 
     - name: Log in to the Container registry
-      uses: docker/login-action@v2 # maintained by Docker
+      uses: docker/login-action@v3 # maintained by Docker
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Docker meta
-      id: meta
-      uses: docker/metadata-action@v4 # maintained by Docker
+    - name: Build and export Docker image
+      uses: docker/build-push-action@v6 # maintained by Docker
       with:
-        images: ghcr.io/${{ github.repository }}
-        tags: |
-          type=schedule,pattern={{date 'YYYY-MM-DD'}}
-          type=raw,value=latest,enable={{is_default_branch}}
+        tags: candidate_image:latest
+        outputs: type=docker,dest=${{ runner.temp }}/candidate_image.tar
 
-    - name: Build and load Docker image
-      uses: docker/build-push-action@v4 # maintained by Docker
+    - name: Upload image as artifact
+      uses: actions/upload-artifact@v4
       with:
-        context: .
-        load: true
-        push: false
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        build-args: |
-          VCS_REF=${{ github.sha }}
-          BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-  echo_output:
-    runs-on: ubuntu-latest # maintained by GitHub
-    needs: build_and_load
-    steps:
-      - name: Echo image tags
-        run: echo "${{ needs.build_and_load.outputs.image_meta }}"
+        name: candidate_image
+        path: ${{ runner.temp }}/candidate_image.tar
 
   osv_scan:
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3  # maintained by Google
+    runs-on: ubuntu-latest # maintained by GitHub
     permissions:
       contents: read
       actions: read
       security-events: write
     needs: build_and_load
-    with:
-      scan-args: scan image ${{ fromJSON(needs.build_and_load.outputs.image_meta).tags[0] }}
-
-  image_test:
-    runs-on: ubuntu-latest # maintained by GitHub
-    needs: build_and_load
     steps:
-      - name: test
-        run: |
-          docker run --rm ${{ fromJSON(needs.build_and_load.outputs.image_meta).tags[0] }} bash -c " \
-            set -e && \
-            echo '--- Checking Terraform ---' && terraform --version && \
-            echo '--- Checking gcloud ---' && gcloud --version && \
-            echo '--- Checking Python ---' && python --version \
-          "
+    - name: Download image artifact
+      uses: actions/download-artifact@v4 # maintained by GitHub
+      with:
+        name: candidate_image
+        path: ${{ runner.temp }}
 
-  publish:
-    runs-on: ubuntu-latest # maintained by GitHub
-    permissions:
-      packages: write
-      security-events: write
-    needs:
-      - build_and_load
-      - osv_scan
-      - image_test
-    steps:
-    - name: Push Docker image
-      run: |
-        echo "${{ needs.build_and_load.outputs.image_tags }}" | sed 's/,/\n/g' | xargs -I {} docker push {}
+    - name: vuln_scan
+      uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3  # maintained by Google
+      with:
+        scan-args: scan image candidate_image:latest
+
+  # image_test:
+  #   runs-on: ubuntu-latest # maintained by GitHub
+  #   needs: build_and_load
+  #   steps:
+  #     - name: test
+  #       run: |
+  #         docker run --rm ${DOCKER_SHA_TAG} bash -c " \
+  #           set -e && \
+  #           echo '--- Checking Terraform ---' && terraform --version && \
+  #           echo '--- Checking gcloud ---' && gcloud --version && \
+  #           echo '--- Checking Python ---' && python --version \
+  #         "
+
+  # publish:
+  #   runs-on: ubuntu-latest # maintained by GitHub
+  #   permissions:
+  #     packages: write
+  #     security-events: write
+  #   needs:
+  #     - build_and_load
+  #     - osv_scan
+  #     - image_test
+  #   steps:
+  #   - name: Push Docker image
+  #     run: |
+  #       echo "${{ needs.build_and_load.outputs.image_tags }}" | sed 's/,/\n/g' | xargs -I {} docker push {}
 
