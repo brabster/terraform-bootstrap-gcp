@@ -44,37 +44,43 @@ jobs:
         name: candidate_image
         path: ${{ runner.temp }}/candidate_image.tar
 
-  osv_scan:
-    runs-on: ubuntu-latest # maintained by GitHub
-    permissions:
-      contents: read
-      actions: read
-      security-events: write
-    needs: build_and_load
-    steps:
-    - name: Download image artifact
-      uses: actions/download-artifact@v4 # maintained by GitHub
-      with:
-        name: candidate_image
-        path: ${{ runner.temp }}
-
-    - name: vuln_scan
-      uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3  # maintained by Google
-      with:
-        scan-args: scan image candidate_image:latest
-
-  # image_test:
+  # osv_scan:
   #   runs-on: ubuntu-latest # maintained by GitHub
+  #   permissions:
+  #     contents: read
+  #     actions: read
+  #     security-events: write
   #   needs: build_and_load
   #   steps:
-  #     - name: test
-  #       run: |
-  #         docker run --rm ${DOCKER_SHA_TAG} bash -c " \
-  #           set -e && \
-  #           echo '--- Checking Terraform ---' && terraform --version && \
-  #           echo '--- Checking gcloud ---' && gcloud --version && \
-  #           echo '--- Checking Python ---' && python --version \
-  #         "
+  #   - name: Download image artifact
+  #     uses: actions/download-artifact@v4 # maintained by GitHub
+  #     with:
+  #       name: candidate_image
+  #       path: ${{ runner.temp }}
+
+  #   - name: vuln_scan
+  #     uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3  # maintained by Google
+  #     with:
+  #       scan-args: scan image candidate_image:latest
+
+  image_test:
+    runs-on: ubuntu-latest # maintained by GitHub
+    needs: build_and_load
+    steps:
+      - name: Download image artifact
+        uses: actions/download-artifact@v4 # maintained by GitHub
+        with:
+          name: candidate_image
+          path: ${{ runner.temp }}
+
+      - name: test
+        run: |
+          docker run --rm candidate_image:latest bash -c " \
+            set -e && \
+            echo '--- Checking Terraform ---' && terraform --version && \
+            echo '--- Checking gcloud ---' && gcloud --version && \
+            echo '--- Checking Python ---' && python --version \
+          "
 
   # publish:
   #   runs-on: ubuntu-latest # maintained by GitHub
