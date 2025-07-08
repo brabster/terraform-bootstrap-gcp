@@ -21,3 +21,10 @@
 
 - Minimise changes, for example do not reformat a file or block as part of adding an instruction.
 - Suggest meaningful points to commit, along with descriptive commit messages.
+
+## Style
+
+- Writing style should follow associated press style guidelines.
+- Jargon should only be used where necessary, aim for plain english.
+- Do not use em-dashes or smart quotes.
+- Use sentence case including capitalised proper nouns and brand names for headings, labels and badges

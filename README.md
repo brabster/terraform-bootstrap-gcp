@@ -1,16 +1,21 @@
-# Development Container for GCP, Terraform, and dbt
+[![Docker image CI](https://github.com/brabster/terraform-bootstrap-gcp/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/brabster/terraform-bootstrap-gcp/actions/workflows/docker-publish.yml)
+[![Docker image size](https://img.shields.io/docker/image-size/brabster/terraform-bootstrap-gcp/latest?logo=docker)](https://github.com/brabster/terraform-bootstrap-gcp/pkgs/container/terraform-bootstrap-gcp)
+[![Image last built](https://img.shields.io/docker/label?server=ghcr.io&username=brabster&repository=terraform-bootstrap-gcp&tag=latest&label=org.opencontainers.image.created&logo=docker)](https://github.com/brabster/terraform-bootstrap-gcp/pkgs/container/terraform-bootstrap-gcp)
+[![GitHub license](https://img.shields.io/github/license/brabster/terraform-bootstrap-gcp)](https://github.com/brabster/terraform-bootstrap-gcp/blob/main/LICENSE)
 
-This repository builds and publishes a Docker container image designed for cloud and data engineering development. It provides a consistent and ready-to-use environment with essential tools for working with Google Cloud Platform (GCP), Terraform, and dbt.
+# Development container for GCP, Terraform, and dbt
 
-The image is automatically built and published to the GitHub Container Registry daily, ensuring that it always contains the latest versions of the included tools and security updates.
+This repository provides a Docker container image for cloud and data engineering. It includes essential tools for working with Google Cloud Platform, Terraform, and dbt.
 
-It is optimized for use in ephemeral environments like:
-- **GitHub Codespaces**: For a pre-configured cloud development environment.
+The image is built and published to the GitHub Container Registry every day. This process ensures it has the latest software versions and security updates.
+
+It is designed for temporary development environments, including:
+- **GitHub Codespaces**: For a pre-built cloud development environment.
 - **GitHub Actions**: For building and testing infrastructure and data pipelines.
 
-## What's Included
+## What's included
 
-The container image comes pre-installed with the following tools:
+The container image includes the following tools:
 
 - **Base Image**: `python:3-slim`
 - **Infrastructure as Code**: `terraform` (latest)
@@ -18,24 +23,24 @@ The container image comes pre-installed with the following tools:
 - **Data Transformation**: `dbt-bigquery`
 - **Language**: `python3` and `pip`
 
-## Image Tagging Strategy
+## Image tagging strategy
 
-The image is tagged with two different schemes:
+The image has two types of tags:
 
-- **`latest`**: This tag always points to the most recent daily build. Use this tag if you want to stay up-to-date automatically.
-- **`YYYY-MM-DD`**: A new tag with the date of the build (e.g., `2025-07-08`) is created every day. Use a date-stamped tag to pin your workflows to a specific, stable version of the image, which is highly recommended for production environments.
+- **`latest`**: This tag always points to the most recent daily build.
+- **`YYYY-MM-DD`**: A tag with the build date (for example, `2025-07-08`) is created every day. Using a date tag is recommended for production to ensure you are using a specific, stable version of the image.
 
-## How to Use
+## How to use
 
-### GitHub Container Registry
+### GitHub container registry
 
 The image is publicly available on the GitHub Container Registry.
 
 - **Image Name**: `ghcr.io/brabster/terraform-bootstrap-gcp`
 
-### Pulling the Image
+### Pulling the image
 
-You can pull the `latest` image to your local machine using Docker:
+You can pull the `latest` image to your computer using Docker:
 
 ```sh
 docker pull ghcr.io/brabster/terraform-bootstrap-gcp:latest
@@ -47,17 +52,17 @@ To pull a specific version, use its date tag:
 docker pull ghcr.io/brabster/terraform-bootstrap-gcp:2025-07-08
 ```
 
-### Running the Container
+### Running the container
 
-To start an interactive session within the container:
+To start an interactive session in the container:
 
 ```sh
 docker run -it --rm ghcr.io/brabster/terraform-bootstrap-gcp:latest /bin/bash
 ```
 
-### Using in GitHub Actions
+### Using in GitHub actions
 
-You can use this image as the execution environment for jobs in your GitHub Actions workflows. Pinning to a specific date is recommended for stability.
+You can use this image to run jobs in your GitHub Actions workflows. Pinning to a specific date is recommended for stability.
 
 **Example: Pinning to a specific version**
 ```yaml
@@ -82,9 +87,9 @@ jobs:
         run: terraform plan
 ```
 
-### Using in GitHub Codespaces
+### Using in GitHub codespaces
 
-To use this image as your development environment in GitHub Codespaces, create a `.devcontainer/devcontainer.json` file in your repository. You can use `latest` to always have the newest tools, or pin to a date for a more stable environment.
+To use this image for your development environment in GitHub Codespaces, create a `.devcontainer/devcontainer.json` file in your repository.
 
 **Example: Using the latest image**
 ```json
@@ -94,7 +99,7 @@ To use this image as your development environment in GitHub Codespaces, create a
 }
 ```
 
-This will configure Codespaces to use the pre-built image, giving you immediate access to all the included tools.
+This configures Codespaces to use the pre-built image, giving you access to all the included tools.
 
 ## License
 
