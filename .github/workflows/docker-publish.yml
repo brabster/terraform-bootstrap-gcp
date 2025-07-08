@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest # maintained by GitHub
     permissions:
       contents: read
+    outputs:
+      image_tags: ${{ steps.meta.outputs.tags }}
     steps:
     - uses: actions/checkout@v3 # maintained by GitHub
 
@@ -57,7 +59,7 @@ jobs:
       security-events: write
     needs: build_and_load
     with:
-      scan-args: scan image ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+      scan-args: scan image ${{ fromJSON(needs.build_and_load.outputs.image_tags)[0] }}
 
   image_test:
     runs-on: ubuntu-latest # maintained by GitHub
@@ -65,7 +67,7 @@ jobs:
     steps:
       - name: test
         run: |
-          docker run --rm ${{ fromJSON(steps.meta.outputs.json).tags[0] }} bash -c " \
+          docker run --rm ${{ fromJSON(needs.build_and_load.outputs.image_tags)[0] }} bash -c " \
             set -e && \
             echo '--- Checking Terraform ---' && terraform --version && \
             echo '--- Checking gcloud ---' && gcloud --version && \
@@ -78,16 +80,17 @@ jobs:
       packages: write
       security-events: write
     needs:
+      - build_and_load
       - osv_scan
       - image_test
     steps:
     - name: Push Docker image
       run: |
-        echo "${{ steps.meta.outputs.tags }}" | sed 's/,/\n/g' | xargs -I {} docker push {}
+        echo "${{ needs.build_and_load.outputs.image_tags }}" | sed 's/,/\n/g' | xargs -I {} docker push {}
 
     - name: Save image to tarball on failure
       if: failure()
-      run: docker save ${{ fromJSON(steps.meta.outputs.json).tags[0] }} -o image.tar
+      run: docker save ${{ needs.build_and_load.outputs.image_tags)[0] }} -o image.tar
 
     - name: Upload image artifact on failure
       if: failure()
