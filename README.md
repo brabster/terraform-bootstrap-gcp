@@ -13,20 +13,19 @@ It is designed for temporary development environments, including:
 
 ## What's included
 
-The container image includes the following tools:
+The container image includes the latest versions of the following tools:
 
 - **Base Image**: `python:3-slim`
-- **Infrastructure as Code**: `terraform` (latest)
+- **Infrastructure as Code**: `terraform`
 - **Cloud SDK**: Google Cloud SDK (`gcloud`, `gsutil`, `bq`)
-- **Data Transformation**: `dbt-bigquery`
-- **Language**: `python3` and `pip`
+- **Language**: `python` and `pip`. `pip` cache contains the latest `dbt-bigquery` dependencies.
 
 ## Image tagging strategy
 
 The image has two types of tags:
 
 - **`latest`**: This tag always points to the most recent daily build.
-- **`YYYY-MM-DD`**: A tag with the build date (for example, `2025-07-08`) is created every day. Using a date tag is recommended for production to ensure you are using a specific, stable version of the image.
+- **`YYYY-MM-DD`**: A tag with the build date (for example, `2025-07-08`) is created every day. These can be used in the event of a problem or a breaking change to temporarily pin back to a previous, working image.
 
 ## How to use
 
@@ -55,7 +54,7 @@ docker pull ghcr.io/brabster/terraform-bootstrap-gcp:2025-07-08
 To start an interactive session in the container:
 
 ```sh
-docker run -it --rm ghcr.io/brabster/terraform-bootstrap-gcp:latest /bin/bash
+docker run -it --rm ghcr.io/brabster/terraform-bootstrap-gcp:latest
 ```
 
 ### Using in GitHub actions
@@ -68,18 +67,18 @@ jobs:
   deploy-infra:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/brabster/terraform-bootstrap-gcp:2025-07-08
+      image: ghcr.io/brabster/terraform-bootstrap-gcp
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v2'
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+          ...
 
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
 
       - name: Run terraform plan
         run: terraform plan
@@ -92,7 +91,7 @@ To use this image for your development environment in GitHub Codespaces, create 
 **Example: Using the latest image**
 ```json
 {
-  "image": "ghcr.io/brabster/terraform-bootstrap-gcp:latest",
+  "image": "ghcr.io/brabster/terraform-bootstrap-gcp",
   "features": {}
 }
 ```
