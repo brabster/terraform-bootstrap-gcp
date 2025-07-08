@@ -48,6 +48,16 @@ jobs:
           VCS_REF=${{ github.sha }}
           BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
+    - name: Vulnerability scan
+      uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml  # maintained by Google
+      permissions:
+        actions: read
+        security-events: write
+      with:
+        scan-args: |-
+          image
+          ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+
     - name: Verify image tools
       run: |
         docker run --rm ${{ fromJSON(steps.meta.outputs.json).tags[0] }} bash -c " \

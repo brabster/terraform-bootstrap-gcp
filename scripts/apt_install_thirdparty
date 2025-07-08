@@ -30,6 +30,8 @@
 
 # Based on eg. https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 
+set -euo pipefail
+
 GPG_KEY_URL=$1
 EXE_NAME=$2
 KEYRING_PATH="/usr/share/keyrings/${EXE_NAME}.gpg"
