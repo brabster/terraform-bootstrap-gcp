@@ -56,7 +56,7 @@ jobs:
     needs: build_and_load
     steps:
       - name: Echo image tags
-        run: echo "${{ fromJSON(needs.build_and_load.outputs.image_meta) }}"
+        run: echo "${{ needs.build_and_load.outputs.image_meta }}"
 
   osv_scan:
     uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3  # maintained by Google
@@ -81,27 +81,17 @@ jobs:
             echo '--- Checking Python ---' && python --version \
           "
 
-  # publish:
-  #   runs-on: ubuntu-latest # maintained by GitHub
-  #   permissions:
-  #     packages: write
-  #     security-events: write
-  #   needs:
-  #     - build_and_load
-  #     - osv_scan
-  #     - image_test
-  #   steps:
-  #   - name: Push Docker image
-  #     run: |
-  #       echo "${{ needs.build_and_load.outputs.image_tags }}" | sed 's/,/\n/g' | xargs -I {} docker push {}
+  publish:
+    runs-on: ubuntu-latest # maintained by GitHub
+    permissions:
+      packages: write
+      security-events: write
+    needs:
+      - build_and_load
+      - osv_scan
+      - image_test
+    steps:
+    - name: Push Docker image
+      run: |
+        echo "${{ needs.build_and_load.outputs.image_tags }}" | sed 's/,/\n/g' | xargs -I {} docker push {}
 
-  #   # - name: Save image to tarball on failure
-  #   #   if: failure()
-  #   #   run: docker save ${{ needs.build_and_load.outputs.image_tags)[0] }} -o image.tar
-
-  #   # - name: Upload image artifact on failure
-  #   #   if: failure()
-  #   #   uses: actions/upload-artifact@v4 # maintained by GitHub
-  #   #   with:
-  #   #     name: failed-image-${{ github.run_id }}
-  #   #     path: image.tar
