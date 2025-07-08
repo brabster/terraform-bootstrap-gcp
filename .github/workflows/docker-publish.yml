@@ -52,7 +52,7 @@ jobs:
           BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
     - name: Vulnerability scan
-      uses: google/osv-scanner-action@v2.0.3  # maintained by Google
+      uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3  # maintained by Google
       with:
         scan-args: "scan image ${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
 
