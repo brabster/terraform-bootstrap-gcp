@@ -67,6 +67,7 @@ jobs:
     steps:
       - name: test
         run: |
+          echo "${{ fromJSON(needs.build_and_load.outputs.image_tags) }}"
           docker run --rm ${{ fromJSON(needs.build_and_load.outputs.image_tags)[0] }} bash -c " \
             set -e && \
             echo '--- Checking Terraform ---' && terraform --version && \
