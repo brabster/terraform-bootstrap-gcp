@@ -19,7 +19,7 @@ jobs:
     permissions:
       contents: read
     outputs:
-      image_tags: ${{ steps.meta.outputs.tags }}
+      image_meta: ${{ steps.meta.outputs.json }}
     steps:
     - uses: actions/checkout@v3 # maintained by GitHub
 
@@ -56,31 +56,30 @@ jobs:
     needs: build_and_load
     steps:
       - name: Echo image tags
-        run: echo "${{ fromJSON(needs.build_and_load.outputs.image_tags) }}"
+        run: echo "${{ fromJSON(needs.build_and_load.outputs.image_meta) }}"
 
-  # osv_scan:
-  #   uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3  # maintained by Google
-  #   permissions:
-  #     contents: read
-  #     actions: read
-  #     security-events: write
-  #   needs: build_and_load
-  #   with:
-  #     scan-args: scan image ${{ fromJSON(needs.build_and_load.outputs.image_tags)[0] }}
+  osv_scan:
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3  # maintained by Google
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    needs: build_and_load
+    with:
+      scan-args: scan image ${{ fromJSON(needs.build_and_load.outputs.image_meta).tags[0] }}
 
-  # image_test:
-  #   runs-on: ubuntu-latest # maintained by GitHub
-  #   needs: build_and_load
-  #   steps:
-  #     - name: test
-  #       run: |
-  #         echo "${{ fromJSON(needs.build_and_load.outputs.image_tags) }}"
-  #         docker run --rm ${{ fromJSON(needs.build_and_load.outputs.image_tags)[0] }} bash -c " \
-  #           set -e && \
-  #           echo '--- Checking Terraform ---' && terraform --version && \
-  #           echo '--- Checking gcloud ---' && gcloud --version && \
-  #           echo '--- Checking Python ---' && python --version \
-  #         "
+  image_test:
+    runs-on: ubuntu-latest # maintained by GitHub
+    needs: build_and_load
+    steps:
+      - name: test
+        run: |
+          docker run --rm ${{ fromJSON(needs.build_and_load.outputs.image_meta).tags[0] }} bash -c " \
+            set -e && \
+            echo '--- Checking Terraform ---' && terraform --version && \
+            echo '--- Checking gcloud ---' && gcloud --version && \
+            echo '--- Checking Python ---' && python --version \
+          "
 
   # publish:
   #   runs-on: ubuntu-latest # maintained by GitHub
