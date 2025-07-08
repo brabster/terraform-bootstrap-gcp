@@ -20,3 +20,4 @@
 ## Changes
 
 - Minimise changes, for example do not reformat a file or block as part of adding an instruction.
+- Suggest meaningful points to commit, along with descriptive commit messages.
