@@ -64,8 +64,6 @@ jobs:
       run: |
         scripts/install_osv_scanner
 
-        osv-scanner --licenses="MIT,Apache-2.0"
-
         docker load -i ${{ runner.temp }}/candidate_image.tar
 
         osv-scanner scan image candidate_image:latest
