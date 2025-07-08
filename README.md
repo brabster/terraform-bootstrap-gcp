@@ -1,6 +1,5 @@
 [![Docker image CI](https://github.com/brabster/terraform-bootstrap-gcp/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/brabster/terraform-bootstrap-gcp/actions/workflows/docker-publish.yml)
 [![Docker image size](https://img.shields.io/docker/image-size/brabster/terraform-bootstrap-gcp/latest?logo=docker)](https://github.com/brabster/terraform-bootstrap-gcp/pkgs/container/terraform-bootstrap-gcp)
-[![Image last built](https://img.shields.io/docker/label?server=ghcr.io&username=brabster&repository=terraform-bootstrap-gcp&tag=latest&label=org.opencontainers.image.created&logo=docker)](https://github.com/brabster/terraform-bootstrap-gcp/pkgs/container/terraform-bootstrap-gcp)
 [![GitHub license](https://img.shields.io/github/license/brabster/terraform-bootstrap-gcp)](https://github.com/brabster/terraform-bootstrap-gcp/blob/main/LICENSE)
 
 # Development container for GCP, Terraform, and dbt
