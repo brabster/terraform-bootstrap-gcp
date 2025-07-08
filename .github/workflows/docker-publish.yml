@@ -49,14 +49,12 @@ jobs:
           BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
     - name: Vulnerability scan
-      uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml  # maintained by Google
+      uses: google/osv-scanner-action@v2  # maintained by Google
       permissions:
         actions: read
         security-events: write
       with:
-        scan-args: |-
-          image
-          ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+        scan-args: scan image ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
 
     - name: Verify image tools
       run: |
