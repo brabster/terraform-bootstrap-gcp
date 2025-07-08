@@ -18,6 +18,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write
     steps:
     - uses: actions/checkout@v3 # maintained by GitHub
 
@@ -51,9 +52,6 @@ jobs:
 
     - name: Vulnerability scan
       uses: google/osv-scanner-action@v2  # maintained by Google
-      permissions:
-        actions: read
-        security-events: write
       with:
         scan-args: scan image ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
 
