@@ -23,13 +23,23 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ghcr.io/${{ github.repository }}
+        tags: |
+          type=schedule,pattern={{date 'YYYY-MM-DD'}}
+          type=ref,event=branch,pattern=latest
+
     - name: Build and push Docker image
       id: build-and-push
       uses: docker/build-push-action@v4
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ github.repository }}:latest
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
         build-args: |
           VCS_REF=${{ github.sha }}
           BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
