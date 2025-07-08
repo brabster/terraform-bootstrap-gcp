@@ -62,13 +62,15 @@ jobs:
   image_test:
     runs-on: ubuntu-latest # maintained by GitHub
     needs: build_and_load
-    run: |
-      docker run --rm ${{ fromJSON(steps.meta.outputs.json).tags[0] }} bash -c " \
-        set -e && \
-        echo '--- Checking Terraform ---' && terraform --version && \
-        echo '--- Checking gcloud ---' && gcloud --version && \
-        echo '--- Checking Python ---' && python --version \
-      "
+    steps:
+      - name: test
+        run: |
+          docker run --rm ${{ fromJSON(steps.meta.outputs.json).tags[0] }} bash -c " \
+            set -e && \
+            echo '--- Checking Terraform ---' && terraform --version && \
+            echo '--- Checking gcloud ---' && gcloud --version && \
+            echo '--- Checking Python ---' && python --version \
+          "
 
   publish:
     runs-on: ubuntu-latest # maintained by GitHub
