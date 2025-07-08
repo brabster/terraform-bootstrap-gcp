@@ -14,12 +14,10 @@ on:
       - scripts/**
 
 jobs:
-  build_and_push:
+  build_and_load:
     runs-on: ubuntu-latest # maintained by GitHub
     permissions:
       contents: read
-      packages: write
-      security-events: write
     steps:
     - uses: actions/checkout@v3 # maintained by GitHub
 
@@ -51,20 +49,36 @@ jobs:
           VCS_REF=${{ github.sha }}
           BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-    - name: Vulnerability scan
-      uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3"  # maintained by Google
-      with:
-        scan-args: "scan image ${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
+  osv_scan:
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3  # maintained by Google
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    needs: build_and_load
+    with:
+      scan-args: scan image ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
 
-    - name: Verify image tools
-      run: |
-        docker run --rm ${{ fromJSON(steps.meta.outputs.json).tags[0] }} bash -c " \
-          set -e && \
-          echo '--- Checking Terraform ---' && terraform --version && \
-          echo '--- Checking gcloud ---' && gcloud --version && \
-          echo '--- Checking Python ---' && python --version \
-        "
+  image_test:
+    runs-on: ubuntu-latest # maintained by GitHub
+    needs: build_and_load
+    run: |
+      docker run --rm ${{ fromJSON(steps.meta.outputs.json).tags[0] }} bash -c " \
+        set -e && \
+        echo '--- Checking Terraform ---' && terraform --version && \
+        echo '--- Checking gcloud ---' && gcloud --version && \
+        echo '--- Checking Python ---' && python --version \
+      "
 
+  publish:
+    runs-on: ubuntu-latest # maintained by GitHub
+    permissions:
+      packages: write
+      security-events: write
+    needs:
+      - osv_scan
+      - image_test
+    steps:
     - name: Push Docker image
       run: |
         echo "${{ steps.meta.outputs.tags }}" | sed 's/,/\n/g' | xargs -I {} docker push {}
