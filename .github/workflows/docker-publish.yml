@@ -51,51 +51,58 @@ jobs:
           VCS_REF=${{ github.sha }}
           BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-  osv_scan:
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3  # maintained by Google
-    permissions:
-      contents: read
-      actions: read
-      security-events: write
-    needs: build_and_load
-    with:
-      scan-args: scan image ${{ fromJSON(needs.build_and_load.outputs.image_tags)[0] }}
-
-  image_test:
+  echo_output:
     runs-on: ubuntu-latest # maintained by GitHub
     needs: build_and_load
     steps:
-      - name: test
-        run: |
-          echo "${{ fromJSON(needs.build_and_load.outputs.image_tags) }}"
-          docker run --rm ${{ fromJSON(needs.build_and_load.outputs.image_tags)[0] }} bash -c " \
-            set -e && \
-            echo '--- Checking Terraform ---' && terraform --version && \
-            echo '--- Checking gcloud ---' && gcloud --version && \
-            echo '--- Checking Python ---' && python --version \
-          "
+      - name: Echo image tags
+        run: echo "${{ fromJSON(needs.build_and_load.outputs.image_tags) }}"
 
-  publish:
-    runs-on: ubuntu-latest # maintained by GitHub
-    permissions:
-      packages: write
-      security-events: write
-    needs:
-      - build_and_load
-      - osv_scan
-      - image_test
-    steps:
-    - name: Push Docker image
-      run: |
-        echo "${{ needs.build_and_load.outputs.image_tags }}" | sed 's/,/\n/g' | xargs -I {} docker push {}
+  # osv_scan:
+  #   uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.0.3  # maintained by Google
+  #   permissions:
+  #     contents: read
+  #     actions: read
+  #     security-events: write
+  #   needs: build_and_load
+  #   with:
+  #     scan-args: scan image ${{ fromJSON(needs.build_and_load.outputs.image_tags)[0] }}
 
-    # - name: Save image to tarball on failure
-    #   if: failure()
-    #   run: docker save ${{ needs.build_and_load.outputs.image_tags)[0] }} -o image.tar
+  # image_test:
+  #   runs-on: ubuntu-latest # maintained by GitHub
+  #   needs: build_and_load
+  #   steps:
+  #     - name: test
+  #       run: |
+  #         echo "${{ fromJSON(needs.build_and_load.outputs.image_tags) }}"
+  #         docker run --rm ${{ fromJSON(needs.build_and_load.outputs.image_tags)[0] }} bash -c " \
+  #           set -e && \
+  #           echo '--- Checking Terraform ---' && terraform --version && \
+  #           echo '--- Checking gcloud ---' && gcloud --version && \
+  #           echo '--- Checking Python ---' && python --version \
+  #         "
 
-    # - name: Upload image artifact on failure
-    #   if: failure()
-    #   uses: actions/upload-artifact@v4 # maintained by GitHub
-    #   with:
-    #     name: failed-image-${{ github.run_id }}
-    #     path: image.tar
+  # publish:
+  #   runs-on: ubuntu-latest # maintained by GitHub
+  #   permissions:
+  #     packages: write
+  #     security-events: write
+  #   needs:
+  #     - build_and_load
+  #     - osv_scan
+  #     - image_test
+  #   steps:
+  #   - name: Push Docker image
+  #     run: |
+  #       echo "${{ needs.build_and_load.outputs.image_tags }}" | sed 's/,/\n/g' | xargs -I {} docker push {}
+
+  #   # - name: Save image to tarball on failure
+  #   #   if: failure()
+  #   #   run: docker save ${{ needs.build_and_load.outputs.image_tags)[0] }} -o image.tar
+
+  #   # - name: Upload image artifact on failure
+  #   #   if: failure()
+  #   #   uses: actions/upload-artifact@v4 # maintained by GitHub
+  #   #   with:
+  #   #     name: failed-image-${{ github.run_id }}
+  #   #     path: image.tar
