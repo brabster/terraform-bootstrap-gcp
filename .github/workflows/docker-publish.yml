@@ -13,10 +13,6 @@ on:
       - .github/**
       - scripts/**
 
-env:
-  DOCKER_SHA_TAG: ghcr.io/${{ github.repository }}:${{ github.sha }}
-  DOCKER_LATEST_TAG: ghcr.io/${{ github.repository }}:latest
-
 jobs:
   build_and_load:
     runs-on: ubuntu-latest # maintained by GitHub
@@ -112,17 +108,30 @@ jobs:
             echo '--- Checking Python ---' && python --version \
           "
 
-  # publish:
-  #   runs-on: ubuntu-latest # maintained by GitHub
-  #   permissions:
-  #     packages: write
-  #     security-events: write
-  #   needs:
-  #     - build_and_load
-  #     - osv_scan
-  #     - image_test
-  #   steps:
-  #   - name: Push Docker image
-  #     run: |
-  #       echo "${{ needs.build_and_load.outputs.image_tags }}" | sed 's/,/\n/g' | xargs -I {} docker push {}
+  publish:
+    runs-on: ubuntu-latest # maintained by GitHub
+    permissions:
+      packages: write
+    needs:
+      - build_and_load
+      - osv_scan
+      - image_test
+    steps:
+
+    - name: Download image artifact
+      uses: actions/download-artifact@v4 # maintained by GitHub
+      with:
+        name: candidate_image
+        path: ${{ runner.temp }}
+
+    - name: Push tagged image
+      env:
+        DOCKER_SHA_TAG: ghcr.io/${{ github.repository }}:${{ github.sha }}
+        DOCKER_LATEST_TAG: ghcr.io/${{ github.repository }}:latest
+      run: |
+        docker load -i ${{ runner.temp }}/candidate_image.tar
+        for tag in $DOCKER_SHA_TAG $DOCKER_LATEST_TAG; do
+          docker tag candidate_image:latest $tag
+          docker push $tag
+        done
 
