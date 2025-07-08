@@ -54,7 +54,7 @@ jobs:
     - name: Vulnerability scan
       uses: google/osv-scanner-action@v2.0.3  # maintained by Google
       with:
-        scan-args: scan image ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+        scan-args: "scan image ${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
 
     - name: Verify image tools
       run: |
