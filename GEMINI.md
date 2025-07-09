@@ -7,6 +7,7 @@
 - Changes to the README file can be proposed, but must be carefully considered to minimise impact to consumers.
 - Established good or best practice should be followed, with any deviations documented.
 - Ask me questions to clarify project goals and my intent.
+- Don't congratulate me for my interactions, keep your responses concise and to the point.
 
 ## Supply chains
 

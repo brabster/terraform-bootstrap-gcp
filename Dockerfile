@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ubuntu:latest
+FROM docker.io/ubuntu:rolling
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -13,25 +13,21 @@ LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.revision=$VCS_REF
 LABEL org.opencontainers.image.licenses="MIT"
 
-COPY scripts/apt_install_thirdparty /usr/local/bin/apt_install_thirdparty
+COPY scripts/ /tmp/scripts/
 
+# Install third party software
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends gnupg lsb-release wget \
-    && python -m pip install --upgrade pip setuptools \
     && rm -rf /var/lib/apt/lists/* \
-    && chmod +x /usr/local/bin/apt_install_thirdparty \
-    && useradd -m vscode
-
-# Terraform, maintained by HashiCorp
-RUN apt_install_thirdparty "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-
-# gcloud CLI, maintained by Google
-RUN apt_install_thirdparty "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main"
-
-# osv-scanner, maintained by Google
-COPY scripts/install_osv_scanner /usr/local/bin/install_osv_scanner
-RUN install_osv_scanner
+    && chmod +x /tmp/scripts/* \
+    && /tmp/scripts/setup_python.sh \
+    && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+    && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
+    && /tmp/scripts/install_osv_scanner.sh \
+    && useradd -m vscode \
+    && echo 'source /etc/python_setup.sh' >> /home/vscode/.bashrc \
+    && rm -rf /tmp/scripts
 
 USER vscode
 
@@ -40,7 +36,7 @@ WORKDIR /home/vscode
 # Pre-warm pip cache
 COPY requirements.txt .
 RUN VENV_PATH=$(mktemp -d) \
-    && python -m venv "$VENV_PATH" \
+    && python3 -m venv "$VENV_PATH" \
     && . "$VENV_PATH"/bin/activate \
     && pip install -r requirements.txt \
     && pip freeze > .preinstalled_requirements.txt \
