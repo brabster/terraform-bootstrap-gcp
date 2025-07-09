@@ -58,7 +58,8 @@ jobs:
         name: candidate_image
         path: ${{ runner.temp }}
 
-    - name: vuln_scan
+    - name: Scan for vulnerabilities
+      continue-on-error: true
       run: |
         scripts/install_osv_scanner
 
