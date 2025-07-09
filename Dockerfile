@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3-slim
+FROM ubuntu:latest
 
 ARG BUILD_DATE
 ARG VCS_REF
