@@ -54,7 +54,7 @@ jobs:
     - name: Scan for vulnerabilities
       continue-on-error: true
       run: |
-        scripts/install_osv_scanner
+        scripts/install_osv_scanner.sh
 
         docker load -i ${{ runner.temp }}/candidate_image.tar
 
