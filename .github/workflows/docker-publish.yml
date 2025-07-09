@@ -56,9 +56,7 @@ jobs:
       run: |
         scripts/install_osv_scanner.sh
 
-        docker load -i ${{ runner.temp }}/candidate_image.tar
-
-        osv-scanner scan image candidate_image:latest --format=sarif --output=osv_scan_results.sarif
+        osv-scanner scan image --archive "${{ runner.temp }}/candidate_image.tar" --format=sarif --output=osv_scan_results.sarif
 
     - name: Upload OSV scan results
       id: upload_artifact
