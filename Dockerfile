@@ -26,7 +26,6 @@ RUN apt-get update \
     && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
     && /tmp/scripts/install_osv_scanner.sh \
     && useradd -m vscode \
-    && echo 'source /etc/python_setup.sh' >> /home/vscode/.bashrc \
     && rm -rf /tmp/scripts
 
 USER vscode
