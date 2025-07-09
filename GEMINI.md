@@ -5,8 +5,10 @@
 - The container images are used in GitHub Codespaces and GitHub actions.
 - The README file and any other documentation must always reflect what the repository does and how it works.
 - Changes to the README file can be proposed, but must be carefully considered to minimise impact to consumers.
+- Review the README file and note any further goals, principles and practices described there.
 - Established good or best practice should be followed, with any deviations documented.
 - Ask me questions to clarify project goals and my intent.
+- Don't congratulate me for my interactions, keep your responses concise and to the point.
 
 ## Supply chains
 
@@ -22,7 +24,7 @@
 ## Changes
 
 - Minimise changes, for example do not reformat a file or block as part of adding an instruction.
-- Suggest meaningful points to commit, along with descriptive commit messages.
+- Suggest meaningful points to commit, along with commit messages that aim to describe *why the change was made* which is important for readers to understand, not *what was changed* which is obvious from the diff.
 
 ## Style
 
