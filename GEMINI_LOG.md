@@ -79,4 +79,5 @@
 3.  Created the `.devcontainer` directory.
 4.  Acknowledged the mistake of hardcoding the image version.
 5.  Created the `devcontainer.json` file with a floating tag (`mcr.microsoft.com/devcontainers/base:alpine`) as requested by the user.
+6.  README updated to realign with project content.
 
