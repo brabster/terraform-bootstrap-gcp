@@ -41,5 +41,3 @@ RUN VENV_PATH=$(mktemp -d) \
     && pip freeze > .preinstalled_requirements.txt \
     && rm -rf "$VENV_PATH" \
     && rm requirements.txt
-
-CMD ["/bin/bash"]
