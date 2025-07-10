@@ -25,7 +25,7 @@ RUN apt-get update \
     && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
     && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
     && /tmp/scripts/install_osv_scanner.sh \
-    && useradd -m vscode \
+    && useradd -ms /bin/bash vscode \
     && rm -rf /tmp/scripts
 
 USER vscode

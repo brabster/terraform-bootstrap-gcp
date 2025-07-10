@@ -25,6 +25,7 @@
 
 - Minimise changes, for example do not reformat a file or block as part of adding an instruction.
 - Suggest meaningful points to commit, along with commit messages that aim to describe *why the change was made* which is important for readers to understand, not *what was changed* which is obvious from the diff.
+- Maintain a summary of our conversations in GEMINI_LOG.md, with each entry containing the date and time when the interaction started and ended. The log maintains a chronological ordering. Prompt me to update the summary when we commit. Do not change existing content, merge new content in.
 
 ## Style
 
