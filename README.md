@@ -17,14 +17,19 @@ It is designed for temporary development environments, including:
 
 The base image is `ubuntu:rolling`. The rolling release is used to match the developer's local environment and to reduce the number of detected vulnerabilities compared to the LTS version. This choice helps to minimize the supply chain and provides more control over the installed software.
 
-## What's included
+## Dependencies
 
-The container image includes the latest versions of the following tools:
+This image relies on the following direct dependencies. Maintainers of these dependencies are responsible for their transitive dependencies. The latest versions are installed when the image is built.
 
-- **Base Image**: `ubuntu:rolling`
-- **Infrastructure as Code**: `terraform`
-- **Cloud SDK**: Google Cloud SDK (`gcloud`, `gsutil`, `bq`)
-- **Language**: `python` and `pip`. `pip` cache contains the latest `dbt-bigquery` dependencies.
+| Component              | Dependency         | Maintainer                 |
+| ---------------------- | ------------------ | -------------------------- |
+| Base image             | `ubuntu:rolling`   | Canonical                  |
+| Infrastructure as Code | `terraform`        | HashiCorp                  |
+| Cloud SDK              | Google Cloud SDK   | Google                     |
+| Language               | `python`           | Python Software Foundation |
+| Data transformation    | `dbt-bigquery`     | dbt Labs                   |
+
+The `dbt-bigquery` Python package and its dependencies are pre-loaded into the `pip` cache to reduce network requests to PyPI.
 
 ## Image tagging strategy
 
@@ -52,7 +57,7 @@ docker run -it --rm ghcr.io/brabster/terraform-bootstrap-gcp:latest
 
 ### Using in GitHub actions
 
-You can use this image to run jobs in your GitHub Actions workflows. Pinning to a specific date is recommended for stability.
+You can use this image to run jobs in your GitHub Actions workflows.
 
 **Example: Pinning to a specific version**
 ```yaml
@@ -60,7 +65,7 @@ jobs:
   deploy-infra:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/brabster/terraform-bootstrap-gcp
+      image: ghcr.io/brabster/terraform-bootstrap-gcp:latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -82,10 +87,8 @@ To use this image for your development environment in GitHub Codespaces, create 
 **Example: Using the latest image**
 ```json
 {
-  "image": "ghcr.io/brabster/terraform-bootstrap-gcp",
-  "features": {}
+  "image": "ghcr.io/brabster/terraform-bootstrap-gcp"
 }
 ```
 
 This configures Codespaces to use the pre-built image, giving you access to all the included tools.
-

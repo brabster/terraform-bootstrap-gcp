@@ -68,6 +68,9 @@
 1.  Asked for a suitable hardened and minimal container image for devcontainers/codespaces that can run Docker.
 2.  Pointed out that the proposed image had a hardcoded version, which violates the project's principle of automatic dependency updates.
 3.  Requested to only add the base image to the `devcontainer.json` file, without the "docker-in-docker" feature.
+4.  Gave up for now, probably more complex than is warranted for the time being. The base image build project should not be coming into contact with sensitive data.
+5.  Gemini Code Assist stopped working; unable to authenticate, error message mentioning redirect URI. Started working again a couple of hours later.
+6.  Tried using image in a test project as a Codespace. Failed to connect. Copied Dockerfile over a Gemini browser chat window, correctly identified that overriding CMD was causing the problem - removing the override fixed the problem. Also suggested that sudo needed to be installed and the vscode user needed passwordless sudo; this does not appear to be the case so far, but probably will be needed at some point to allow user-driven OS dependency updates.
 
 ### Gemini Actions:
 
