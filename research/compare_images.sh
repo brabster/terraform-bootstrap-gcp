@@ -6,6 +6,7 @@ IMAGE=$1
 
 # Sanitize the image name to create a valid filename.
 SANITIZED_IMAGE_NAME=$(echo "$IMAGE" | tr /: -)
+mkdir -p uncommitted
 SCAN_OUTPUT_FILENAME="uncommitted/${SANITIZED_IMAGE_NAME}.sarif"
 
 # Docker operations
