@@ -18,8 +18,8 @@ for metadata_file in ${PROJECT_DIR}/uncommitted/*.json; do
   
   sarif_file="${metadata_file%.json}.sarif"
 
-  FIXES_AVAILABLE=$(jq '[.runs[0].results[] | select(.fixes != null)] | length' "$sarif_file")
-  UNIQUE_VULNERABILITIES=$(jq -r '.runs[0].results[].ruleId' "$sarif_file" | sort | uniq | wc -l | tr -d ' ')
+  FIXES_AVAILABLE=$(jq '[.runs[0].tool.driver.rules[] | select(.help.text | contains("listed fixed versions")) | .id]|sort|unique|length' "$sarif_file")
+  UNIQUE_VULNERABILITIES=$(jq '[.runs[0].results[].ruleId]|unique|length' "$sarif_file")
   
   echo "| $IMAGE | $SIZE | $UNIQUE_VULNERABILITIES | $FIXES_AVAILABLE |" >> $REPORT_FILE
 done
