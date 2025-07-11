@@ -12,9 +12,12 @@ echo "" >> $REPORT_FILE
 echo "| Image | Size | Unique vulnerabilities | Fixes available |" >> $REPORT_FILE
 echo "|---|---|---|---|" >> $REPORT_FILE
 
-for sarif_file in ${PROJECT_DIR}/uncommitted/*.sarif; do
-  IMAGE=$(basename "$sarif_file" .sarif | tr - \n/)
-  SIZE=$(jq -r '.runs[0].properties.image_size' "$sarif_file")
+for metadata_file in ${PROJECT_DIR}/uncommitted/*.json; do
+  IMAGE=$(jq -r '.image_name' "$metadata_file")
+  SIZE=$(jq -r '.image_size' "$metadata_file")
+  
+  sarif_file="${metadata_file%.json}.sarif"
+
   FIXES_AVAILABLE=$(jq '[.runs[0].results[] | select(.fixes != null)] | length' "$sarif_file")
   UNIQUE_VULNERABILITIES=$(jq -r '.runs[0].results[].ruleId' "$sarif_file" | sort | uniq | wc -l | tr -d ' ')
   

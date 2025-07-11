@@ -8,6 +8,7 @@ IMAGE=$1
 SANITIZED_IMAGE_NAME=$(echo "$IMAGE" | tr /: -)
 mkdir -p uncommitted
 SCAN_OUTPUT_FILENAME="uncommitted/${SANITIZED_IMAGE_NAME}.sarif"
+METADATA_FILENAME="uncommitted/${SANITIZED_IMAGE_NAME}.json"
 
 # Docker operations
 docker pull "$IMAGE"
@@ -18,8 +19,10 @@ osv-scanner scan image --format sarif --output "$SCAN_OUTPUT_FILENAME" "$IMAGE" 
 
 docker rmi "$IMAGE"
 
-# Inject the image size into the SARIF report for the generate-report job to use.
-jq --arg image_size "$SIZE" '.runs[0].properties.image_size = $image_size' "$SCAN_OUTPUT_FILENAME" > tmp.sarif && mv tmp.sarif "$SCAN_OUTPUT_FILENAME"
+# Create metadata file
+jq -n --arg image_name "$IMAGE" --arg image_size "$SIZE" \
+  '{image_name: $image_name, image_size: $image_size}' > "$METADATA_FILENAME"
 
-# Output the path of the generated SARIF file for the workflow to use.
+# Output paths
 echo "sarif_path=${SCAN_OUTPUT_FILENAME}" >> "$GITHUB_OUTPUT"
+echo "metadata_path=${METADATA_FILENAME}" >> "$GITHUB_OUTPUT"
