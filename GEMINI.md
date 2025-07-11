@@ -9,6 +9,14 @@
 - Established good or best practice should be followed, with any deviations documented.
 - Ask me questions to clarify project goals and my intent.
 - Don't congratulate me for my interactions, keep your responses concise and to the point.
+- Where possible, ensure that a push to GitHub Actions is not required to exercise and test things and instead capabilities and features can be tested interactively first.
+- Avoid setting anything up on target docker images that is not necessary for the purpose of those images.
+- Never overwrite files that were written or edited by a human.
+
+## Shell scripts
+
+- Any shell scripts that interact with files and directories in the project should first set  a `PROJECT_DIR` variable and then resolve references relative to that. For example, for a script `foo.sh` in `scripts`, the variable should be set to `PROJECT_DIR=$(dirname "$0")/..` and a file `thefile.txt` in `uncommitted` should be referenced as `${PROJECT_DIR}/uncommitted/thefile.txt`
+
 
 ## Supply chains
 
@@ -19,7 +27,9 @@
 - An overall package health score for an example Python package "mypackage" can be obtained from https://snyk.io/advisor/python/mypackage. Use this service to ensure that all packages have a package health score greater than 80.
 - Trusted maintainers and suppliers take responsibility for the transitive dependencies of their projects. Only direct dependencies need to be considered.
 - Each dependency must be annotated at point of inclusion with a comment declaring the maintaining party.
+- GitHub actions are also dependencies. We only trust actions supplied by GitHub and Docker.
 - A list of all dependencies and maintaining parties must be called out in a README section.
+- NEVER ADD ANY SOFTWARE FROM A MAINTAINER THAT IS NOT EXPLICITLY TRUSTED.
 
 ## Changes
 

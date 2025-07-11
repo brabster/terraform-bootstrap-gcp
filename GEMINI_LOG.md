@@ -81,3 +81,12 @@
 5.  Created the `devcontainer.json` file with a floating tag (`mcr.microsoft.com/devcontainers/base:alpine`) as requested by the user.
 6.  README updated to realign with project content.
 
+## 2024-07-25
+
+- Updated the script to output unique vulnerability identifiers.
+- Modified the workflow to upload the unique vulnerability count in the report.
+- Verified the GitHub Actions workflow and ensured the report and SARIF files are uploaded as artifacts.
+- Cleaned up images after scanning.
+- Removed timestamp from the report filename and stored reports in an uncommitted directory.
+- Added a README to the uncommitted directory and updated .gitignore.
+- Updated the spec document to reflect the new changes.
