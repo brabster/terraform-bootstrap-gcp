@@ -24,5 +24,6 @@ jq -n --arg image_name "$IMAGE" --arg image_size "$SIZE" \
   '{image_name: $image_name, image_size: $image_size}' > "$METADATA_FILENAME"
 
 # Output paths
+echo "artifact_name_prefix=${SANITIZED_IMAGE_NAME}" >> "$GITHUB_OUTPUT"
 echo "sarif_path=${SCAN_OUTPUT_FILENAME}" >> "$GITHUB_OUTPUT"
 echo "metadata_path=${METADATA_FILENAME}" >> "$GITHUB_OUTPUT"
