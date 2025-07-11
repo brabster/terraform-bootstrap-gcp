@@ -4,9 +4,21 @@ set -euo pipefail
 
 IMAGE=$1
 
-PROJECT_DIR=$(dirname "$0")/..
-SCAN_OUTPUT_FILE="${PROJECT_DIR}/uncommitted/$(echo $IMAGE | tr /: -).sarif"
+# Sanitize the image name to create a valid filename.
+SANITIZED_IMAGE_NAME=$(echo "$IMAGE" | tr /: -)
+SCAN_OUTPUT_FILENAME="uncommitted/${SANITIZED_IMAGE_NAME}.sarif"
 
-docker pull $IMAGE
-osv-scanner scan image --format sarif --output "$SCAN_OUTPUT_FILE" "$IMAGE" || true
-docker rmi $IMAGE
+# Docker operations
+docker pull "$IMAGE"
+SIZE=$(docker images --format "{{.Size}}" "$IMAGE")
+
+# Scan the image
+osv-scanner scan image --format sarif --output "$SCAN_OUTPUT_FILENAME" "$IMAGE" || true
+
+docker rmi "$IMAGE"
+
+# Inject the image size into the SARIF report for the generate-report job to use.
+jq --arg image_size "$SIZE" '.runs[0].properties.image_size = $image_size' "$SCAN_OUTPUT_FILENAME" > tmp.sarif && mv tmp.sarif "$SCAN_OUTPUT_FILENAME"
+
+# Output the path of the generated SARIF file for the workflow to use.
+echo "sarif_path=${SCAN_OUTPUT_FILENAME}" >> "$GITHUB_OUTPUT"

@@ -13,7 +13,7 @@ echo "| Image | Size | Unique vulnerabilities | Fixes available |" >> $REPORT_FI
 echo "|---|---|---|---|" >> $REPORT_FILE
 
 for sarif_file in ${PROJECT_DIR}/uncommitted/*.sarif; do
-  IMAGE=$(jq -r '.runs[0].tool.driver.name' "$sarif_file")
+  IMAGE=$(basename "$sarif_file" .sarif | tr - \n/)
   SIZE=$(jq -r '.runs[0].properties.image_size' "$sarif_file")
   FIXES_AVAILABLE=$(jq '[.runs[0].results[] | select(.fixes != null)] | length' "$sarif_file")
   UNIQUE_VULNERABILITIES=$(jq -r '.runs[0].results[].ruleId' "$sarif_file" | sort | uniq | wc -l | tr -d ' ')
