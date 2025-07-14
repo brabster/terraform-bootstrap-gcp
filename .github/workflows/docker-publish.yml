@@ -56,7 +56,13 @@ jobs:
       run: |
         scripts/install_osv_scanner.sh
 
-        osv-scanner scan image --archive "${{ runner.temp }}/candidate_image.tar" --format=sarif --output=osv_scan_results.sarif
+        osv-scanner scan image --archive "${{ runner.temp }}/candidate_image.tar"
+
+        osv-scanner scan image --archive "${{ runner.temp }}/candidate_image.tar" --format=sarif --output=osv_scan_results.sarif.raw
+
+        # temporarily post-process the SARIF file to add missing fields that GitHub needs
+
+        jq -f .github/scripts/sarif_cleanup.jq osv_scan_results.sarif.raw > osv_scan_results.sarif
 
     - name: Upload OSV scan results
       id: upload_artifact
