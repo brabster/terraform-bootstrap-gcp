@@ -14,25 +14,32 @@ LABEL org.opencontainers.image.revision=$VCS_REF
 LABEL org.opencontainers.image.licenses="MIT"
 
 COPY scripts/ /tmp/scripts/
+COPY requirements-auth.txt /tmp/requirements-auth.txt
 
-# Install third party software
+# Install Canonical-managed third party software
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends gnupg lsb-release wget \
-    && rm -rf /var/lib/apt/lists/* \
-    && chmod +x /tmp/scripts/* \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install additional third-party and local software
+RUN chmod +x /tmp/scripts/* \
     && /tmp/scripts/setup_python.sh \
+    && python3 -m venv /opt/auth-venv \
+    && /opt/auth-venv/bin/pip install --no-cache-dir -r /tmp/requirements-auth.txt \
+    && mv /tmp/scripts/auth.py /opt/auth-venv/bin/ \
+    && mv /tmp/scripts/auth-wrapper.sh /usr/local/bin/auth \
+    && chmod +x /usr/local/bin/auth \
     && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
-    && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
     && /tmp/scripts/install_osv_scanner.sh \
     && useradd -ms /bin/bash vscode \
-    && rm -rf /tmp/scripts
+    && rm -rf /tmp/scripts /tmp/requirements-auth.txt
 
 USER vscode
 
 WORKDIR /home/vscode
 
-# Pre-warm pip cache
+# Pre-warm pip cache for dbt-related dependencies
 COPY requirements.txt .
 RUN VENV_PATH=$(mktemp -d) \
     && python3 -m venv "$VENV_PATH" \
