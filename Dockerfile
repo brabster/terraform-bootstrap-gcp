@@ -16,6 +16,7 @@ LABEL org.opencontainers.image.licenses="MIT"
 COPY scripts/ /tmp/scripts/
 
 # Install third party software
+# Includes update for vulnerable library in latest gcloud command line tools
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends gnupg lsb-release wget \
@@ -24,7 +25,7 @@ RUN apt-get update \
     && /tmp/scripts/setup_python.sh \
     && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
     && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
-    && /usr/lib/google-cloud-sdk/platform/bundledpythonunix/bin/pip install -U "cryptography>=45.0.5" \ # update the vulnerable cryptography library deployed in gcloud tool
+    && /usr/lib/google-cloud-sdk/platform/bundledpythonunix/bin/pip install -U "cryptography>=45.0.5" \
     && /tmp/scripts/install_osv_scanner.sh \
     && useradd -ms /bin/bash vscode \
     && rm -rf /tmp/scripts
