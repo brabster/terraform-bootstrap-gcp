@@ -98,6 +98,7 @@ jobs:
             echo '--- Checking Terraform ---' && terraform --version && \
             echo '--- Checking gcloud ---' && gcloud --version && \
             echo '--- Checking Python ---' && python --version \
+            echo '--- Checking osv-scanner ---' && osv-scanner --version \
           "
 
   publish:
