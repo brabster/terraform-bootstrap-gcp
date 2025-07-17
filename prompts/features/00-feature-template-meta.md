@@ -14,6 +14,10 @@ It should ensure that the LLM asks questions to clarify intent and context, and 
 
 It should ensure that the LLM performs a pre-mortem and highlights any potential showstoppers and external dependencies that might cause problems for implementation.
 
+The template must also include a 'Threat Model Impact' section. This section should prompt the agent to analyze the security implications of the change, including a net risk assessment (reduction, increase, or neutral). It should also guide the agent to prefer solutions that do not increase the overall security risk.
+
+The template should also include a 'Documentation' section, which will prompt the agent to consider any changes to the README.md or other documentation.
+
 Have the template end with a section to reference important sources, then close with a TL;DR section at the end of the rules template!
 
 The template should be short and concise (under 200 lines), but ensure that important topics are covered.

@@ -23,6 +23,11 @@ This feature removes the `docker/login-action` GitHub action from the `docker-pu
 - **Asset Identification:** The primary asset is the `GITHUB_TOKEN` secret, which is used to authenticate to the GitHub Container Registry.
 - **Threat Identification:** The previous threat was the potential for the `docker/login-action` to be compromised, which could lead to the exfiltration of the `GITHUB_TOKEN`.
 - **Mitigation Strategies:** By removing the third-party action, we eliminate its potential for compromise. The new method uses the Docker CLI directly with the `--password-stdin` flag, which is a secure way to handle the secret, preventing it from being exposed in shell history or process lists. Trust is now placed on the already-trusted GitHub runner environment.
+- **Net Risk Assessment:** This change represents a net **reduction** in risk.
+
+## Documentation
+
+- The `README.md` should be updated to reflect that Docker is no longer a direct supplier for the GitHub Actions workflow.
 
 ## References
 
