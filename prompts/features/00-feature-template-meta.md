@@ -1,13 +1,20 @@
-Generate a file template that I can base a unit of work like a feature or a fix on.
+Ask me any questions that are needed to refine my intent.
 
-Start the template with YAML frontmatter including the prompt that was used, verbatim.
+Generate a prompt template file.
+The template will be provided to an AI agent along with a prompt outlining a specific feature or fix.
+The AI agent will use the template to generate a meta-prompt for the agent's subsequent implementation of the feature or fix.
 
-The rules template should have a structure that is optimised for an LLM to use as system context, yet also human readable. It should ensure that the LLM asks questions to clarify intent and context. It should ensure that the LLM performs a pre-mortem and discusses any potential showstoppers with the human user.
+The tempate should begin with a frontmatter in YAML format, and template consumers should provide a `prompt` key with the original prompt they were given, and a `refinement` key, containing a summary of any conversational refinement that followed.
 
-The target rules should generally stay short and concise (under 200 lines)
+The template should have a structure that is optimised for an LLM to use as system context, yet also human readable.
+
+It should ensure that the LLM asks questions to clarify intent and context, and that it takes step to validate that the feature works correctly.
+
+It should ensure that the LLM performs a pre-mortem and highlights any potential showstoppers and external dependencies that might cause problems for implementation.
 
 Have the template end with a section to reference important sources, then close with a TL;DR section at the end of the rules template!
 
-Follow industry best practices and emerging patterns found on the internet for rules files when formulating this rules template!
+The template should be short and concise (under 200 lines), but ensure that important topics are covered.
+Follow industry best practices and emerging patterns found on the internet for meta-prompting and specification-driven development when formulating this rules template!
 
-Write the rules template to the prompts/features directory as 00-feature-template.md.
+Write the template to the prompts/features directory as 00-feature-template.md.

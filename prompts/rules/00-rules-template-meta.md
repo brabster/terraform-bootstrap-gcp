@@ -1,6 +1,6 @@
 Generate a rules file template that I can base my rules files on.
 
-Start the template with frontmatter including the prompt that was used, verbatim.
+Start the template with frontmatter including the initial prompt and a summary of any conversation that followed.
 
 The rules template should have a structure that is optimised for an LLM to use as system context, yet also human readable. It should be applicable to a variety of topics such as testing strategy, functional programming, building docker images, python programming, data engineering etc. Some of these rules will be more technical in nature while others purely philosophical.
 
