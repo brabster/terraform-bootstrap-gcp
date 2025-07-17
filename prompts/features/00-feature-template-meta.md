@@ -4,7 +4,9 @@ Generate a prompt template file.
 The template will be provided to an AI agent along with a prompt outlining a specific feature or fix.
 The AI agent will use the template to generate a meta-prompt for the agent's subsequent implementation of the feature or fix.
 
-The tempate should begin with a frontmatter in YAML format, and template consumers should provide a `prompt` key with the original prompt they were given, and a `refinement` key, containing a summary of any conversational refinement that followed.
+The generated feature file must have two parts:
+1. A YAML frontmatter block containing the `prompt` (the original user request) and `refinement` (a summary of any clarifications).
+2. The body of the document, which will contain the detailed implementation plan, following the sections outlined in the template.
 
 The template should have a structure that is optimised for an LLM to use as system context, yet also human readable.
 
