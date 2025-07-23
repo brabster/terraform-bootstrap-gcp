@@ -96,18 +96,10 @@ jobs:
       - name: test
         run: |
           docker load -i ${{ runner.temp }}/candidate_image.tar
-          docker run --rm candidate_image:latest bash -c " \
-            set -e && \
-            echo '--- Checking Terraform ---' && terraform --version && \
-            echo '--- Checking gcloud ---' && gcloud --version && \
-            echo '--- Checking Python ---' && python --version && \
-            echo '--- Checking osv-scanner ---' && osv-scanner --version && \
-            echo '--- Checking user ---' && \
-            if [ "$(whoami)" != 'ubuntu' ]; then echo 'User is not ubuntu'; exit 1; fi && \
-            if [ "$(id -u)" != '1000' ]; then echo 'UID is not 1000'; exit 1; fi && \
-            if [ "$(id -g)" != '1000' ]; then echo 'GID is not 1000'; exit 1; fi && \
-            echo 'User checks passed.' \
-          "
+          docker run --rm \
+            -v ${{ github.workspace }}/scripts/pre-flight-checks.sh:/tmp/pre-flight-checks.sh \
+            candidate_image:latest \
+            bash /tmp/pre-flight-checks.sh
 
   publish:
     runs-on: ubuntu-latest # maintained by GitHub
