@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 #
-# pre-flight-checks.sh
-#
 # Runs pre-flight checks to verify the environment has the required tools and
 # user configuration before proceeding with a workflow.
 #
