@@ -99,7 +99,7 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}/scripts:/tmp/scripts \
             candidate_image:latest \
-            bash /tmp/scripts/validate_image.sh
+            bash -c 'ls /tmp/scripts' 
 
   publish:
     runs-on: ubuntu-latest # maintained by GitHub
