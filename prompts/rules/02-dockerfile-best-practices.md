@@ -18,6 +18,8 @@ prompt: |
 - Minimize the number of layers by combining related commands.
 - Use a `.dockerignore` file to exclude unnecessary files and directories.
 - Avoid running containers as the root user. Create and switch to a non-root user.
+- Each new command should be placed on a new line, with appropriate continuation characters.
+  - For example, RUN commands should be continued with a `\` character ending a line and an appropriately indented `&&` on the next.
 
 ## Best Practices
 

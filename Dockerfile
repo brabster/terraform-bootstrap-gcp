@@ -28,12 +28,11 @@ RUN apt-get update \
     && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
     && rm -rf /usr/lib/google-cloud-sdk/platform/bundledpythonunix \
     && /tmp/scripts/install_osv_scanner.sh \
-    && useradd -ms /bin/bash vscode \
     && rm -rf /tmp/scripts
 
-USER vscode
+USER ubuntu
 
-WORKDIR /home/vscode
+WORKDIR /home/ubuntu
 
 # Pre-warm pip cache
 COPY requirements.txt .

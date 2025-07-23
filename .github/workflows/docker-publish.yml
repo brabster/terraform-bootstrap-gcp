@@ -100,8 +100,13 @@ jobs:
             set -e && \
             echo '--- Checking Terraform ---' && terraform --version && \
             echo '--- Checking gcloud ---' && gcloud --version && \
-            echo '--- Checking Python ---' && python --version \
-            echo '--- Checking osv-scanner ---' && osv-scanner --version \
+            echo '--- Checking Python ---' && python --version && \
+            echo '--- Checking osv-scanner ---' && osv-scanner --version && \
+            echo '--- Checking user ---' && \
+            if [ "$(whoami)" != 'ubuntu' ]; then echo 'User is not ubuntu'; exit 1; fi && \
+            if [ "$(id -u)" != '1000' ]; then echo 'UID is not 1000'; exit 1; fi && \
+            if [ "$(id -g)" != '1000' ]; then echo 'GID is not 1000'; exit 1; fi && \
+            echo 'User checks passed.' \
           "
 
   publish:
