@@ -94,7 +94,10 @@ jobs:
           path: ${{ runner.temp }}
 
       - name: test
+        shell: bash
         run: |
+          set -euo pipefail
+
           docker load -i ${{ runner.temp }}/candidate_image.tar
           cat ./scripts/validate_image.sh | docker run --rm -i \
             candidate_image:latest \
