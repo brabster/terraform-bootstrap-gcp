@@ -27,7 +27,7 @@ jobs:
         docker save candidate_image:latest -o ${{ runner.temp }}/candidate_image.tar
       
     - name: Upload image as artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4  # maintained by GitHub
       with:
         name: candidate_image
         path: ${{ runner.temp }}/candidate_image.tar
@@ -72,7 +72,7 @@ jobs:
 
     - name: Upload OSV scan results to Code Scanning
       if: ${{ always() }}
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v3  # maintained by GitHub
       with:
         sarif_file: osv_scan_results.sarif
 
@@ -99,7 +99,7 @@ jobs:
           set -euo pipefail
 
           docker load -i ${{ runner.temp }}/candidate_image.tar
-          cat ./scripts/validate_image.sh | docker run --rm -i \
+          cat ${{ github.workspace }}/scripts/validate_image.sh | docker run --rm -i \
             candidate_image:latest \
             bash
 
