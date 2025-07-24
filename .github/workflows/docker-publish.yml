@@ -96,7 +96,7 @@ jobs:
       - name: test
         run: |
           docker load -i ${{ runner.temp }}/candidate_image.tar
-          cat ./pre-flight-checks.sh | docker run --rm -i \
+          cat ./scripts/validate_image.sh | docker run --rm -i \
             candidate_image:latest \
             bash
 
