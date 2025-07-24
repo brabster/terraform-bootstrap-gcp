@@ -93,6 +93,8 @@ jobs:
           name: candidate_image
           path: ${{ runner.temp }}
 
+      - uses: actions/checkout@v3 # maintained by GitHub
+
       - name: test
         shell: bash
         run: |
