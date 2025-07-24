@@ -96,10 +96,9 @@ jobs:
       - name: test
         run: |
           docker load -i ${{ runner.temp }}/candidate_image.tar
-          docker run --rm \
-            -v ${{ github.workspace }}/scripts:/tmp/scripts \
+          cat ./pre-flight-checks.sh | docker run --rm -i \
             candidate_image:latest \
-            bash -c 'ls /tmp/scripts' 
+            bash
 
   publish:
     runs-on: ubuntu-latest # maintained by GitHub
