@@ -81,6 +81,8 @@ jobs:
   image_test:
     runs-on: ubuntu-latest # maintained by GitHub
     needs: build_and_load
+    permissions:
+      contents: read
     steps:
 
       - name: Download image artifact
@@ -103,8 +105,10 @@ jobs:
 
   test_osv_scanner_wrapper:
     runs-on: ubuntu-latest # maintained by GitHub
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v3 # maintained by GitHub
+      - uses: actions/checkout@v4 # maintained by GitHub
 
       - name: Install osv-scanner
         run: scripts/install_osv_scanner.sh
