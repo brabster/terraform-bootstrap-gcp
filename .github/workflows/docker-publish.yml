@@ -52,14 +52,10 @@ jobs:
         path: ${{ runner.temp }}
 
     - name: Scan for vulnerabilities
-      continue-on-error: true
       run: |
         scripts/install_osv_scanner.sh
-
-        # don't fail the build if there are vulnerabilities. There are always vulnerabilities.
-        osv-scanner scan image --archive "${{ runner.temp }}/candidate_image.tar" || true
-
-        osv-scanner scan image --archive "${{ runner.temp }}/candidate_image.tar" --format=sarif --output=osv_scan_results.sarif || true
+        scripts/run_osv_scanner.sh scan image --archive "${{ runner.temp }}/candidate_image.tar"
+        scripts/run_osv_scanner.sh scan image --archive "${{ runner.temp }}/candidate_image.tar" --format=sarif --output=osv_scan_results.sarif
 
     - name: Upload OSV scan results
       id: upload_artifact
@@ -105,6 +101,28 @@ jobs:
             candidate_image:latest \
             bash
 
+  test_osv_scanner_wrapper:
+    runs-on: ubuntu-latest # maintained by GitHub
+    steps:
+      - uses: actions/checkout@v3 # maintained by GitHub
+
+      - name: Install osv-scanner
+        run: scripts/install_osv_scanner.sh
+
+      - name: Test wrapper script with a valid image
+        run: |
+          docker pull ubuntu:latest
+          scripts/run_osv_scanner.sh scan image ubuntu:latest
+
+      - name: Test wrapper script with a non-existent image
+        run: |
+          if scripts/run_osv_scanner.sh scan image non-existent-image:latest; then
+            echo "::error::Wrapper script succeeded unexpectedly for a non-existent image."
+            exit 1
+          else
+            echo "Wrapper script failed as expected for a non-existent image."
+          fi
+
   publish:
     runs-on: ubuntu-latest # maintained by GitHub
     permissions:
@@ -113,6 +131,7 @@ jobs:
       - build_and_load
       - osv_scan
       - image_test
+      - test_osv_scanner_wrapper
     steps:
 
     - name: Download image artifact

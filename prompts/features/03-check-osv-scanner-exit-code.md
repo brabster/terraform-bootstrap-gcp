@@ -42,11 +42,9 @@ refinement: |
 ## 4. Validation and Testing
 
 - **Automated Tests:**
-    - Create a new test script (e.g., `tests/test_run_osv_scanner.sh`) that: 
-        - Mocks `osv-scanner` to simulate different exit codes (0, 1, >1).
-        - Calls `scripts/run_osv_scanner.sh` with the mocked `osv-scanner`.
-        - Asserts the expected exit code from `scripts/run_osv_scanner.sh`.
-    - Add a step to the GitHub Actions workflow to run this test script.
+    - Add a step to the GitHub Actions workflow to test the wrapper script.
+        - Run the wrapper script against the current version of the base image and confirm success.
+        - Run the wrapper script against a a non-existent image and confirm failure.
 - **Integration Tests:** The change will be tested by running the `docker-publish.yml` workflow.
 - **Manual Testing:**
     1. Run the `run_osv_scanner.sh` script with an image that has vulnerabilities to ensure it exits with 0.
