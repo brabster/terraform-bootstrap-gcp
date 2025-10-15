@@ -16,7 +16,7 @@
 
 - Dependencies include, but are not limited to:
   - GitHub actions (eg. `actions/download-artifact`)
-  - Docker base images (eg. `ubuntu:rolling`)
+  - Docker base images (eg. `ubuntu:latest`)
   - Operating system packages (eg. `wget`)
   - Other installed libraries and applications (eg. `osv-scanner`)
   - Python packages (eg. `dbt-bigquery`)

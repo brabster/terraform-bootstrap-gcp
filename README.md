@@ -15,7 +15,7 @@ It is designed for temporary development environments, including:
 
 ## Base image
 
-The base image is `ubuntu:rolling`. The rolling release is used to match the developer's local environment and to reduce the number of detected vulnerabilities compared to the LTS version. This choice helps to minimize the supply chain and provides more control over the installed software.
+The base image is `ubuntu:latest`. The latest LTS release is used to ensure compatibility with third-party software repositories. This choice helps to minimize the supply chain and provides more control over the installed software.
 
 ## Dependencies
 
@@ -23,7 +23,7 @@ This image relies on the following direct dependencies. Maintainers of these dep
 
 | Component              | Dependency         | Maintainer                 |
 | ---------------------- | ------------------ | -------------------------- |
-| Base image             | `ubuntu:rolling`   | Canonical                  |
+| Base image             | `ubuntu:latest`    | Canonical                  |
 | Infrastructure as Code | `terraform`        | HashiCorp                  |
 | Cloud SDK              | Google Cloud SDK   | Google                     |
 | Language               | `python`           | Python Software Foundation |
