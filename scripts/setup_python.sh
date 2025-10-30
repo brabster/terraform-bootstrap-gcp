@@ -1,5 +1,7 @@
 #!/bin/env bash
 
+set -euo pipefail
+
 apt-get update
 
 # Install Python, venv and pip - we'll set an env var to prevent installations to system for a better error message

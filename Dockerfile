@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM docker.io/ubuntu:rolling
+FROM docker.io/ubuntu:latest
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -18,8 +18,8 @@ COPY scripts/ /tmp/scripts/
 # Install third party software
 # Point gcloud tooling at installed python and delete bundled python (removed cryptography vulnerability, reduces image size)
 ENV CLOUDSDK_PYTHON=/usr/bin/python
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-    && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends gnupg lsb-release wget \
     && rm -rf /var/lib/apt/lists/* \
     && chmod +x /tmp/scripts/* \
