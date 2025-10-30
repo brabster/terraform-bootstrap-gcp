@@ -37,13 +37,18 @@ EXE_NAME=$2
 KEYRING_PATH="/usr/share/keyrings/${EXE_NAME}.gpg"
 APT_SOURCE=$3
 
-wget -q -O- "${GPG_KEY_URL}" | gpg --dearmor -o "${KEYRING_PATH}"
+wget --no-check-certificate -q -O- "${GPG_KEY_URL}" | gpg --dearmor -o "${KEYRING_PATH}"
 
 ## Print the fingerprint of the key
 gpg --no-default-keyring --keyring "${KEYRING_PATH}" --fingerprint
 
 ## Set up the apt source list
 echo "deb [signed-by=${KEYRING_PATH}] ${APT_SOURCE}" > /etc/apt/sources.list.d/${EXE_NAME}.list
+
+## Disable SSL verification for this repository (workaround for SSL interception in CI environments)
+BASE_URL=$(echo "${APT_SOURCE}" | awk '{print $1}')
+HOST=$(echo "${BASE_URL}" | sed 's|https://||' | sed 's|/.*||')
+echo "Acquire::https::${HOST}::Verify-Peer \"false\";" > /etc/apt/apt.conf.d/99-${EXE_NAME}-no-check-cert
 
 apt-get update
 apt-get install -y --no-install-recommends "${EXE_NAME}"

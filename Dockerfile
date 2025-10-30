@@ -39,7 +39,7 @@ COPY requirements.txt .
 RUN VENV_PATH=$(mktemp -d) \
     && python3 -m venv "$VENV_PATH" \
     && . "$VENV_PATH"/bin/activate \
-    && pip install -r requirements.txt \
+    && pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt \
     && pip freeze > .preinstalled_requirements.txt \
     && rm -rf "$VENV_PATH" \
     && rm requirements.txt
