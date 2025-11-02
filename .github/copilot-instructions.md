@@ -6,6 +6,7 @@ This repository produces container images for data-centric development on Google
 
 ## Project goals and principles
 
+- Security, stability, sustainability and simplicity are priorities for this project
 - Minimize dependencies and maintain a clear, auditable supply chain
 - Default to rolling/latest versions for automatic security updates
 - Fail loudly and securely rather than silently
