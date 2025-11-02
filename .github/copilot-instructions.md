@@ -17,7 +17,7 @@ This repository produces container images for data-centric development on Google
 
 ## Agent environment
 
-The agent operates in GitHub Copilt environment, and is limited by strict firewall rules. if these rules might be causing a problem, stop, summarise the issue and wait for advice
+The agent operates in GitHub Copilot environment, and is limited by strict firewall rules. if these rules might be causing a problem, stop, summarise the issue and wait for advice
 
 ## Build and test
 
