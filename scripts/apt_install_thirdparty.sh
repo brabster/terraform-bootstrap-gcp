@@ -37,7 +37,7 @@ EXE_NAME=$2
 KEYRING_PATH="/usr/share/keyrings/${EXE_NAME}.gpg"
 APT_SOURCE=$3
 
-wget -q -O- "${GPG_KEY_URL}" | gpg --dearmor -o "${KEYRING_PATH}"
+wget -v -O- "${GPG_KEY_URL}" | gpg --dearmor -o "${KEYRING_PATH}"
 
 ## Print the fingerprint of the key
 gpg --no-default-keyring --keyring "${KEYRING_PATH}" --fingerprint
