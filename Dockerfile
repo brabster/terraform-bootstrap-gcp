@@ -24,8 +24,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && chmod +x /tmp/scripts/* \
     && /tmp/scripts/setup_python.sh \
-    && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
-    && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
+    && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" "798AEC654E5C15428C8E42EEAA16FCBCA621E701" \
+    && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3" \
     && rm -rf /usr/lib/google-cloud-sdk/platform/bundledpythonunix \
     && /tmp/scripts/install_osv_scanner.sh \
     && rm -rf /tmp/scripts

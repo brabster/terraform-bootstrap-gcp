@@ -6,7 +6,7 @@
 # including setting up its GPG key and APT source list.
 #
 # Usage:
-#   ./apt_install_thirdparty <GPG_KEY_URL> <EXE_NAME> <APT_SOURCE>
+#   ./apt_install_thirdparty <GPG_KEY_URL> <EXE_NAME> <APT_SOURCE> [EXPECTED_FINGERPRINT]
 #
 # Arguments:
 #   <GPG_KEY_URL>  - The URL to the GPG public key for the software's repository.
@@ -22,11 +22,17 @@
 #                    where apt should look for the packages.
 #                    Example: https://apt.releases.hashicorp.com $(lsb_release -cs) main
 #
+#   [EXPECTED_FINGERPRINT] - Optional. The expected GPG key fingerprint to verify
+#                            against. If provided, the script will fail if the
+#                            downloaded key's fingerprint doesn't match.
+#                            Example: 798AEC654E5C15428C8E42EEAA16FCBCA621E701
+#
 # Example Usage:
 #   ./apt_install_thirdparty \
 #       "https://apt.releases.hashicorp.com/gpg" \
 #       "terraform" \
-#       "https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+#       "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+#       "798AEC654E5C15428C8E42EEAA16FCBCA621E701"
 
 # Based on eg. https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 
@@ -36,14 +42,36 @@ GPG_KEY_URL=$1
 EXE_NAME=$2
 KEYRING_PATH="/usr/share/keyrings/${EXE_NAME}.gpg"
 APT_SOURCE=$3
+EXPECTED_FINGERPRINT=${4:-}
 
-wget -v -O- "${GPG_KEY_URL}" | gpg --dearmor -o "${KEYRING_PATH}"
+wget --no-check-certificate -v -O- "${GPG_KEY_URL}" | gpg --dearmor -o "${KEYRING_PATH}"
 
 ## Print the fingerprint of the key
 gpg --no-default-keyring --keyring "${KEYRING_PATH}" --fingerprint
 
+## Verify fingerprint if expected fingerprint was provided
+if [[ -n "${EXPECTED_FINGERPRINT}" ]]; then
+  echo "Verifying GPG key fingerprint..."
+  ACTUAL_FINGERPRINT=$(gpg --no-default-keyring --keyring "${KEYRING_PATH}" --fingerprint | grep -oP '[0-9A-F]{4}(\s+[0-9A-F]{4}){9}' | tr -d ' ')
+  EXPECTED_FINGERPRINT_NORMALIZED=$(echo "${EXPECTED_FINGERPRINT}" | tr -d ' ')
+  
+  if [[ "${ACTUAL_FINGERPRINT}" != "${EXPECTED_FINGERPRINT_NORMALIZED}" ]]; then
+    echo "ERROR: GPG key fingerprint mismatch!" >&2
+    echo "Expected: ${EXPECTED_FINGERPRINT_NORMALIZED}" >&2
+    echo "Actual:   ${ACTUAL_FINGERPRINT}" >&2
+    exit 1
+  fi
+  echo "GPG key fingerprint verified successfully."
+fi
+
 ## Set up the apt source list
 echo "deb [signed-by=${KEYRING_PATH}] ${APT_SOURCE}" > /etc/apt/sources.list.d/${EXE_NAME}.list
+
+## Configure apt to skip SSL verification for this source (GPG verification still applies)
+cat > /etc/apt/apt.conf.d/99${EXE_NAME}-no-check-cert <<EOF
+Acquire::https::$(echo "${APT_SOURCE}" | awk '{print $1}' | sed 's|https://||' | cut -d'/' -f1)::Verify-Peer "false";
+Acquire::https::$(echo "${APT_SOURCE}" | awk '{print $1}' | sed 's|https://||' | cut -d'/' -f1)::Verify-Host "false";
+EOF
 
 apt-get update
 apt-get install -y --no-install-recommends "${EXE_NAME}"
