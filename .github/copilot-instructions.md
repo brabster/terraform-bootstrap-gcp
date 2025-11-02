@@ -10,14 +10,14 @@ This repository produces container images for data-centric development on Google
 - Minimize dependencies and maintain a clear, auditable supply chain
 - Default to rolling/latest versions for automatic security updates
 - Fail loudly and securely rather than silently
-- Write in Associated Press style with plain English (avoid jargon, em-dashes, and smart quotes)
+- Write in Associated Press style with plain British English (avoid jargon, em-dashes, and smart quotes)
 - Use sentence case for headings, labels, and badges
 - Make minimal changes - don't reformat code unnecessarily
 - Ensure README and documentation always reflect what the project actually does
 
 ## Agent environment
 
-The agent operates in GitHub Copilot environment, and is limited by strict firewall rules. if these rules might be causing a problem, stop, summarise the issue and wait for advice
+The agent operates in GitHub Copilot environment, and is limited by strict firewall rules. If these rules might be causing a problem, stop, summarise the issue and wait for advice
 
 ## Build and test
 
