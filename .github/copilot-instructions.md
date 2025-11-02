@@ -15,6 +15,10 @@ This repository produces container images for data-centric development on Google
 - Make minimal changes - don't reformat code unnecessarily
 - Ensure README and documentation always reflect what the project actually does
 
+## Agent environment
+
+The agent operates in GitHub Copilt environment, and is limited by strict firewall rules. if these rules might be causing a problem, stop, summarise the issue and wait for advice
+
 ## Build and test
 
 The project uses Docker to build container images:
