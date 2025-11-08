@@ -61,5 +61,5 @@ export DOCKER_BUILDKIT=1
 # Build the image, passing through any additional arguments
 # Note: ${BUILD_ARGS[@]+"${BUILD_ARGS[@]}"} expands to nothing if array is empty,
 # or to properly quoted array elements if non-empty
-echo "Running: docker build ${BUILD_ARGS[@]+"${BUILD_ARGS[@]}"} $@"
+echo "Running: docker build" ${BUILD_ARGS[@]+"${BUILD_ARGS[@]}"} "$@"
 docker build ${BUILD_ARGS[@]+"${BUILD_ARGS[@]}"} "$@"
