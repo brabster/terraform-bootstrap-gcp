@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [[#21](https://github.com/brabster/terraform-bootstrap-gcp/pull/21)] - Add support for intercepting proxy certificates in Docker builds
+## [[#22](https://github.com/brabster/terraform-bootstrap-gcp/pull/22)] - Add support for intercepting proxy certificates in Docker builds
 
 ### Added
 
@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - New script `scripts/install_proxy_cert.sh` to install custom CA certificates into the system trust store during Docker build.
 - Updated Dockerfile to accept an optional `proxy_cert` build secret for injecting proxy CA certificates.
 - Updated README with instructions for building with intercepting proxy support.
+
+### Changed
+
+- Switched base image from `ubuntu:rolling` to `ubuntu:latest` to avoid compatibility issues with third-party package repositories that may not immediately support newly released Ubuntu versions. Fixes #12.
 
 ### Security
 

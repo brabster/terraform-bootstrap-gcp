@@ -87,7 +87,7 @@ When addressing code review comments:
 
 - **Ask for clarification** if the request is ambiguous before making changes
 - **Explain constraints** when suggested approaches aren't feasible (e.g., Dockerfile syntax limitations)
-- **Be precise with claims**: Only claim something is "standard" or "recommended" if you can cite specific documentation
+- **Support claims with evidence**: Always back up claims with facts and documentation. Only claim something is "standard" or "recommended" if you can cite specific authoritative sources. Verify claims before making them.
 - **Iterate on documentation**: Refine explanations based on reviewer questions
 - **Test thoroughly** after each change to ensure functionality is preserved
 - **Clean up comprehensively**: If feedback identifies one unused artifact, check for others from the same approach

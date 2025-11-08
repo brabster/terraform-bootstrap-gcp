@@ -15,7 +15,7 @@ It is designed for temporary development environments, including:
 
 ## Base image
 
-The base image is `ubuntu:latest`. This tag provides the latest LTS release and is updated automatically when new LTS versions are released. This choice provides a balance between stability and security updates.
+The base image is `ubuntu:latest`. This tag provides the latest LTS release and is updated automatically when new LTS versions are released. LTS releases receive the same security updates as other Ubuntu releases. This choice avoids compatibility issues with third-party package repositories that may not immediately support newly released Ubuntu versions.
 
 ## Dependencies
 
