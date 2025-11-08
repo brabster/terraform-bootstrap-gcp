@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [[#CURRENT_PR](https://github.com/brabster/terraform-bootstrap-gcp/pull/CURRENT_PR)] - Fix build failures in Copilot environment with auto-detection of intercepting proxy
+
+### Added
+
+- New script `scripts/detect_copilot_proxy_cert.sh` to automatically detect GitHub Copilot coding agent environment and locate the intercepting proxy certificate.
+- New script `scripts/build_image.sh` to automatically handle Docker builds in Copilot environments with intercepting proxies.
+- The build script detects the Copilot environment using the `COPILOT_API_URL` environment variable.
+
+### Changed
+
+- Improved error handling in `scripts/apt_install_thirdparty.sh` to provide clearer error messages when GPG key download fails.
+- Changed wget from quiet mode (`-q`) to normal mode with proper error capture to make proxy-related errors visible.
+- Updated README with instructions for using the new build script and automatic Copilot environment detection.
+
+### Fixed
+
+- Fixed issue where GPG key downloads failed with "gpg: no valid OpenPGP data found" error in Copilot coding agent environment.
+- Fixed confusing error messages that made it difficult to diagnose intercepting proxy issues.
+
+### Security
+
+- Automatic proxy certificate detection only activates when `COPILOT_API_URL` environment variable is present, minimizing risk of false positives.
+- The proxy certificate is only used if explicitly found in the expected system location (`/usr/local/share/ca-certificates/`).
+- No automatic trust of arbitrary certificates - only certificates already installed by the host system are used.
+
 ## [[#22](https://github.com/brabster/terraform-bootstrap-gcp/pull/22)] - Add support for intercepting proxy certificates in Docker builds
 
 ### Added

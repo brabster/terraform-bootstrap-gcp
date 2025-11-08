@@ -97,7 +97,15 @@ This configures Codespaces to use the pre-built image, giving you access to all 
 
 ### Building locally
 
-To build the image locally:
+The recommended way to build the image is using the build script, which automatically detects and handles intercepting proxy environments:
+
+```sh
+bash scripts/build_image.sh -t candidate_image:latest .
+```
+
+The build script automatically detects GitHub Copilot coding agent environments (using the `COPILOT_API_URL` environment variable) and configures the build to use the intercepting proxy certificate if present.
+
+You can also build directly with docker:
 
 ```sh
 docker build -t candidate_image:latest .
@@ -105,7 +113,7 @@ docker build -t candidate_image:latest .
 
 ### Building with intercepting proxy support
 
-If you are building in an environment with an intercepting proxy (such as GitHub Copilot), you need to provide the proxy's CA certificate:
+If you are building in an environment with an intercepting proxy that is not automatically detected, you can manually provide the proxy's CA certificate:
 
 ```sh
 DOCKER_BUILDKIT=1 docker build \
