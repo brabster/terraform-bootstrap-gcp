@@ -48,6 +48,7 @@ RUN --mount=type=secret,id=proxy_cert,required=false \
     && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends gnupg lsb-release wget \
     && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /bin/bash /bin/sh \
     && /tmp/scripts/setup_python.sh \
     && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
     && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \

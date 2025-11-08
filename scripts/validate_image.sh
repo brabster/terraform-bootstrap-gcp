@@ -40,6 +40,21 @@ check_user_context() {
   echo "User checks passed."
 }
 
+# Verifies that /bin/sh points to bash rather than dash.
+# Exits with a clear error message if the check fails.
+check_default_shell() {
+  echo "--- Checking default shell ---"
+  local sh_target
+  sh_target=$(readlink -f /bin/sh)
+  
+  if [[ "${sh_target}" != "/bin/bash" && "${sh_target}" != "/usr/bin/bash" ]]; then
+    echo "Error: /bin/sh points to '${sh_target}', but expected bash." >&2
+    exit 1
+  fi
+  
+  echo "Default shell check passed: /bin/sh -> ${sh_target}"
+}
+
 # The main entry point for the script.
 main() {
   echo "--- Checking Terraform ---"
@@ -55,6 +70,8 @@ main() {
   osv-scanner --version
 
   check_user_context
+  
+  check_default_shell
 
   echo
   echo "All pre-flight checks passed successfully."
