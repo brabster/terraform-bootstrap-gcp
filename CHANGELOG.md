@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [TBD] - Change default shell to bash
+
+### Changed
+
+- Changed the system's default shell (`/bin/sh`) from dash to bash to ensure bash features are available in all shell contexts, including Dockerfile RUN commands and scripts using `#!/bin/sh`.
+- Added validation check to `scripts/validate_image.sh` to verify `/bin/sh` points to bash.
+
 ## [[#22](https://github.com/brabster/terraform-bootstrap-gcp/pull/22)] - Add support for intercepting proxy certificates in Docker builds
 
 ### Added
