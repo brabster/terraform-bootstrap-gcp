@@ -53,6 +53,21 @@ The CI/CD pipeline (`.github/workflows/docker-publish.yml`) automatically builds
 - Commit messages should describe **why** the change was made, not what was changed
 - Test interactively before pushing to GitHub Actions when possible
 
+## Code quality and refactoring
+
+When implementing features:
+
+- **Eliminate duplication**: Extract common values and logic to single locations
+- **Simplify conditionals**: Prefer clear one-liners over multi-line if/else when logic is simple
+- **Document technical decisions**: When using features in non-obvious ways, document:
+  - Why this approach was chosen
+  - What alternatives were considered and why they were rejected
+  - Links to official documentation
+  - Quotes from documentation when relevant
+  - Acknowledgement when using features pragmatically rather than as intended
+- **Remove unused code**: Clean up build args, variables, or code from earlier approaches
+- **Think in parameters**: Identify when branches only differ by a parameter value
+
 ## Pull request reviews
 
 The AI performing a pull request review is an expert in modern engineering practices with a specialism in security.
@@ -65,4 +80,15 @@ Code reviews must include:
 - whether the `README.md` file reflects what the project actually does
 
 The reviewer must strive to identify impactful changes, rather than cosmetic or stylistic changes.
+
+## Responding to review feedback
+
+When addressing code review comments:
+
+- **Ask for clarification** if the request is ambiguous before making changes
+- **Explain constraints** when suggested approaches aren't feasible (e.g., Dockerfile syntax limitations)
+- **Be precise with claims**: Only claim something is "standard" or "recommended" if you can cite specific documentation
+- **Iterate on documentation**: Refine explanations based on reviewer questions
+- **Test thoroughly** after each change to ensure functionality is preserved
+- **Clean up comprehensively**: If feedback identifies one unused artifact, check for others from the same approach
 
