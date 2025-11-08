@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Maintained by: brabster (project owner)
 """
 Deduplicate SARIF vulnerability results from osv-scanner.
 
