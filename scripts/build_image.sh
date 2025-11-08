@@ -24,8 +24,6 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 export DOCKER_BUILDKIT=1
 
 # Check if first argument is a file (proxy cert path)
@@ -34,8 +32,10 @@ if [[ $# -gt 0 && -f "$1" ]]; then
     PROXY_CERT_PATH="$1"
     shift
 else
-    # Auto-detect proxy certificate
-    PROXY_CERT_PATH=$("${SCRIPT_DIR}/detect_copilot_proxy_cert.sh")
+    # Auto-detect proxy certificate in Copilot environment
+    if [[ -n "${COPILOT_API_URL:-}" ]]; then
+        PROXY_CERT_PATH=$(find /usr/local/share/ca-certificates/ -name "mkcert_development_CA_*.crt" -type f 2>/dev/null | head -n 1 || true)
+    fi
 fi
 
 # Build with optional proxy certificate

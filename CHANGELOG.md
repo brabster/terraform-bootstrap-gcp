@@ -8,14 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- New script `scripts/detect_copilot_proxy_cert.sh` to automatically detect GitHub Copilot coding agent environment and locate the intercepting proxy certificate.
 - New script `scripts/build_image.sh` to automatically handle Docker builds in Copilot environments with intercepting proxies.
-- The build script detects the Copilot environment using the `COPILOT_API_URL` environment variable.
+- Auto-detection of Copilot environment using the `COPILOT_API_URL` environment variable, integrated directly into the build script.
 
 ### Changed
 
-- Improved error handling in `scripts/apt_install_thirdparty.sh` to provide clearer error messages when GPG key download fails.
-- Changed wget from quiet mode (`-q`) to normal mode with proper error capture to make proxy-related errors visible.
+- Simplified error handling in `scripts/apt_install_thirdparty.sh` to show errors naturally without verbose explanations.
+- Changed wget from quiet mode (`-q`) to normal mode to make proxy-related errors visible.
 - Updated README with instructions for using the new build script and automatic Copilot environment detection.
 
 ### Fixed
