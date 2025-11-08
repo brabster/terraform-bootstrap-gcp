@@ -24,11 +24,14 @@
 
 set -euo pipefail
 
-CERT_PATH="${1:-}"
+readonly IMAGE_NAME="candidate_image:latest"
+readonly CERT_PATH="${1:-}"
+
+# Prepare build arguments
+BUILD_ARGS=(-t "${IMAGE_NAME}")
 
 if [[ -z "${CERT_PATH}" ]]; then
     echo "Building without proxy certificate support..."
-    DOCKER_BUILDKIT=1 docker build -t candidate_image:latest .
 else
     if [[ ! -f "${CERT_PATH}" ]]; then
         echo "Error: Certificate file not found at '${CERT_PATH}'" >&2
@@ -37,11 +40,11 @@ else
     fi
     
     echo "Building with proxy certificate from '${CERT_PATH}'..."
-    DOCKER_BUILDKIT=1 docker build \
-        --secret id=proxy_cert,src="${CERT_PATH}" \
-        -t candidate_image:latest \
-        .
+    BUILD_ARGS+=(--secret "id=proxy_cert,src=${CERT_PATH}")
 fi
+
+# Build the image with common arguments and optional secret
+DOCKER_BUILDKIT=1 docker build "${BUILD_ARGS[@]}" .
 
 echo
 echo "Build completed successfully!"
