@@ -24,9 +24,10 @@ COPY scripts/ /tmp/scripts/
 # - It keeps the certificate out of the build context (avoiding context pollution)
 # - It keeps the certificate out of image layers and build cache (security best practice)
 # - It supports optional mounting with required=false (bind mounts require the file to exist)
-# - Despite the name, "secret" mounts are the standard BuildKit mechanism for securely
-#   injecting files that shouldn't be cached or embedded in images
-# - See: https://docs.docker.com/build/building/secrets/
+# - Docker BuildKit secrets documentation: https://docs.docker.com/build/building/secrets/
+#   states "A build secret is any piece of sensitive information" and "never stored in the
+#   final image". While our certificate isn't sensitive, we use this mechanism for its
+#   technical properties: not persisted in layers or cache, and supports optional mounting.
 #
 # Alternative approaches considered and rejected:
 # - COPY: Would require certificate in build context, pollutes context with environment-specific files,
@@ -37,7 +38,7 @@ COPY scripts/ /tmp/scripts/
 #
 # While the certificate itself is not secret (it's a public CA certificate), the "secret" mount type
 # is used here for its technical properties (optional, not cached, not in final image) rather than
-# for confidentiality.
+# for confidentiality. This is a pragmatic use of the feature for its technical capabilities.
 #
 # Use: docker build --secret id=proxy_cert,src=/path/to/cert.pem ...
 ENV CLOUDSDK_PYTHON=/usr/bin/python
