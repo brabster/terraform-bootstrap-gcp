@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - Automatic proxy certificate detection in Copilot environments
+
+### Added
+
+- New script `scripts/build_image.sh` that automatically detects GitHub Copilot coding agent environment and uses the intercepting proxy certificate.
+- Docker build process now automatically works in Copilot environments without manual certificate configuration.
+
+### Changed
+
+- Removed `-q` (quiet) flag from `wget` in `apt_install_thirdparty.sh` to show clear error messages when GPG key downloads fail.
+- Updated `.github/workflows/docker-publish.yml` to use the new `build_image.sh` script.
+- Updated README with instructions for using the automatic build script.
+
+### Fixed
+
+- Fixed "gpg: no valid OpenPGP data found" error when building in Copilot coding agent environment.
+
 ## [[#22](https://github.com/brabster/terraform-bootstrap-gcp/pull/22)] - Add support for intercepting proxy certificates in Docker builds
 
 ### Added

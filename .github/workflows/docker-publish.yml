@@ -23,7 +23,7 @@ jobs:
 
     - name: Build and export Docker image
       run: |
-        docker build -t candidate_image:latest .
+        scripts/build_image.sh -t candidate_image:latest .
         docker save candidate_image:latest -o ${{ runner.temp }}/candidate_image.tar
       
     - name: Upload image as artifact
