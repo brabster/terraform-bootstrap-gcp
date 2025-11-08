@@ -28,6 +28,7 @@ This image relies on the following direct dependencies. Maintainers of these dep
 | Cloud SDK              | Google Cloud SDK   | Google                     |
 | Language               | `python`           | Python Software Foundation |
 | Data transformation    | `dbt-bigquery`     | dbt Labs                   |
+| Shell completion       | `bash-completion`  | Canonical                  |
 
 The `dbt-bigquery` Python package and its dependencies are pre-loaded into the `pip` cache to reduce network requests to PyPI.
 
