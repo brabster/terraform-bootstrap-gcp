@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM docker.io/ubuntu:rolling
+FROM docker.io/ubuntu:latest
 
 ARG BUILD_DATE
 ARG VCS_REF

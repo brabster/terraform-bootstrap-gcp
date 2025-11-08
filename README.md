@@ -15,7 +15,7 @@ It is designed for temporary development environments, including:
 
 ## Base image
 
-The base image is `ubuntu:rolling`. The rolling release is used to match the developer's local environment and to reduce the number of detected vulnerabilities compared to the LTS version. This choice helps to minimize the supply chain and provides more control over the installed software.
+The base image is `ubuntu:latest`. This tag provides the latest LTS release and is updated automatically when new LTS versions are released. This choice provides a balance between stability and security updates.
 
 ## Dependencies
 
