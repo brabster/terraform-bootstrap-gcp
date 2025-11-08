@@ -97,39 +97,17 @@ This configures Codespaces to use the pre-built image, giving you access to all 
 
 ### Building locally
 
-The recommended way to build the image is using the build script, which automatically detects and handles intercepting proxy environments:
+The recommended way to build the image is using the build script, which handles intercepting proxy environments:
 
 ```sh
 bash scripts/build_image.sh -t candidate_image:latest .
 ```
 
 The build script automatically detects GitHub Copilot coding agent environments (using the `COPILOT_API_URL` environment variable) and configures the build to use the intercepting proxy certificate if present.
-
-Or build directly with docker:
-
-```sh
-docker build -t candidate_image:latest .
-```
-
-### Building with intercepting proxy support
-
-The build script automatically detects GitHub Copilot coding agent environments and uses the intercepting proxy certificate if present. 
-
 For environments with an intercepting proxy that is not automatically detected, you can manually provide the proxy's CA certificate using the build script:
 
 ```sh
 bash scripts/build_image.sh /path/to/proxy-ca.pem -t candidate_image:latest .
 ```
-
-Or directly with Docker BuildKit:
-
-```sh
-DOCKER_BUILDKIT=1 docker build \
-  --secret id=proxy_cert,src=/path/to/proxy-ca.pem \
-  -t candidate_image:latest \
-  .
-```
-
-The build will fail with a clear error message if you specify a certificate path that does not exist. If you do not provide a certificate, the build proceeds without proxy support.
 
 **Note on intercepting proxies:** When using an intercepting proxy, the proxy terminates the TLS connection and re-encrypts it with its own certificate. This means you are trusting the proxy to properly validate the original server's certificate. In GitHub's hosted environments, this validation is performed by GitHub's infrastructure.
