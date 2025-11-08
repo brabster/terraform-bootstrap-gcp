@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - Enable git CLI completion
+
+### Added
+
+- Added bash-completion package to enable git command-line completion in interactive shells. This provides tab completion for git commands, branches, and options, improving the developer experience when using git in the container.
+
 ## [[#22](https://github.com/brabster/terraform-bootstrap-gcp/pull/22)] - Add support for intercepting proxy certificates in Docker builds
 
 ### Added

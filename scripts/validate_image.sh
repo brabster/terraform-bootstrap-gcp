@@ -54,6 +54,26 @@ main() {
   echo "--- Checking osv-scanner ---"
   osv-scanner --version
 
+  echo "--- Checking git completion ---"
+  # Verify bash-completion package is installed and git completion file exists
+  if [[ ! -f /usr/share/bash-completion/bash_completion ]]; then
+    echo "Error: bash-completion is not installed." >&2
+    exit 1
+  fi
+  if [[ ! -f /usr/share/bash-completion/completions/git ]]; then
+    echo "Error: git completion file not found." >&2
+    exit 1
+  fi
+  # Source git completion to verify it can be loaded
+  # shellcheck disable=SC1091
+  source /usr/share/bash-completion/completions/git
+  if complete -p git &>/dev/null; then
+    echo "Git completion is available."
+  else
+    echo "Error: Git completion could not be loaded." >&2
+    exit 1
+  fi
+
   check_user_context
 
   echo
