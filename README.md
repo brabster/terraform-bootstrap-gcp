@@ -103,9 +103,19 @@ To build the image locally:
 docker build -t candidate_image:latest .
 ```
 
-### Building with intercepting proxy support
+### Building with intercepting proxy support (recommended for GitHub Copilot)
 
-If you are building in an environment with an intercepting proxy (such as GitHub Copilot), you need to provide the proxy's CA certificate:
+If you are building in an environment with an intercepting proxy (such as GitHub Copilot coding agents), use the build script that automatically detects and uses the proxy certificate:
+
+```sh
+./scripts/build_image.sh
+```
+
+The script automatically detects mkcert development CA certificates commonly installed in Copilot environments.
+
+#### Manual build with certificate
+
+You can also manually specify the proxy certificate:
 
 ```sh
 DOCKER_BUILDKIT=1 docker build \
@@ -114,6 +124,18 @@ DOCKER_BUILDKIT=1 docker build \
   .
 ```
 
-The build will fail with a clear error message if you specify a certificate path that does not exist. If you do not provide a certificate, the build proceeds without proxy support.
+#### Troubleshooting build failures
+
+If the build fails with errors about GPG key downloads or certificate verification:
+
+1. Check if you are in an environment with an intercepting proxy (common in GitHub Copilot)
+2. Look for error messages indicating SSL/TLS certificate verification failures
+3. Check if a proxy CA certificate exists:
+   ```sh
+   ls /usr/local/share/ca-certificates/mkcert_*.crt
+   ```
+4. Use the build script (`./scripts/build_image.sh`) or manually pass the certificate path
+
+The build provides clear error messages when certificate verification fails, including suggestions for resolution.
 
 **Note on intercepting proxies:** When using an intercepting proxy, the proxy terminates the TLS connection and re-encrypts it with its own certificate. This means you are trusting the proxy to properly validate the original server's certificate. In GitHub's hosted environments, this validation is performed by GitHub's infrastructure.

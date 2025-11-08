@@ -37,7 +37,29 @@ EXE_NAME=$2
 KEYRING_PATH="/usr/share/keyrings/${EXE_NAME}.gpg"
 APT_SOURCE=$3
 
-wget -q -O- "${GPG_KEY_URL}" | gpg --dearmor -o "${KEYRING_PATH}"
+echo "Downloading GPG key for ${EXE_NAME} from ${GPG_KEY_URL}..."
+
+# Download the GPG key with verbose error output
+# Remove -q flag to ensure errors are visible
+if ! wget -O- "${GPG_KEY_URL}" 2>&1 | tee /tmp/gpg_download_${EXE_NAME}.log | gpg --dearmor -o "${KEYRING_PATH}"; then
+    echo "Error: Failed to download or process GPG key from ${GPG_KEY_URL}" >&2
+    echo "" >&2
+    echo "This may be caused by:" >&2
+    echo "  1. Network connectivity issues" >&2
+    echo "  2. SSL/TLS certificate verification failure (common with intercepting proxies)" >&2
+    echo "  3. Invalid or inaccessible GPG key URL" >&2
+    echo "" >&2
+    echo "If building in an environment with an intercepting proxy (e.g., GitHub Copilot):" >&2
+    echo "  - Check if a proxy CA certificate exists (e.g., in /usr/local/share/ca-certificates/)" >&2
+    echo "  - Use: docker build --secret id=proxy_cert,src=/path/to/cert.pem ..." >&2
+    echo "" >&2
+    echo "wget output:" >&2
+    cat /tmp/gpg_download_${EXE_NAME}.log >&2 || true
+    exit 1
+fi
+
+# Clean up temporary log file
+rm -f /tmp/gpg_download_${EXE_NAME}.log
 
 ## Print the fingerprint of the key
 gpg --no-default-keyring --keyring "${KEYRING_PATH}" --fingerprint
