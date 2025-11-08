@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - Support for intercepting proxy environments
+## [[#21](https://github.com/brabster/terraform-bootstrap-gcp/pull/21)] - Add support for intercepting proxy certificates in Docker builds
 
 ### Added
 
