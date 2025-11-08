@@ -15,7 +15,7 @@ It is designed for temporary development environments, including:
 
 ## Base image
 
-The base image is `ubuntu:rolling`. The rolling release is used to match the developer's local environment and to reduce the number of detected vulnerabilities compared to the LTS version. This choice helps to minimize the supply chain and provides more control over the installed software.
+The base image is `ubuntu:latest`. This tag provides the latest LTS release and is updated automatically when new LTS versions are released. LTS releases receive the same security updates as other Ubuntu releases. This choice avoids compatibility issues with third-party package repositories that may not immediately support newly released Ubuntu versions.
 
 ## Dependencies
 
@@ -92,3 +92,28 @@ To use this image for your development environment in GitHub Codespaces, create 
 ```
 
 This configures Codespaces to use the pre-built image, giving you access to all the included tools.
+
+## Building the image
+
+### Building locally
+
+To build the image locally:
+
+```sh
+docker build -t candidate_image:latest .
+```
+
+### Building with intercepting proxy support
+
+If you are building in an environment with an intercepting proxy (such as GitHub Copilot), you need to provide the proxy's CA certificate:
+
+```sh
+DOCKER_BUILDKIT=1 docker build \
+  --secret id=proxy_cert,src=/path/to/proxy-ca.pem \
+  -t candidate_image:latest \
+  .
+```
+
+The build will fail with a clear error message if you specify a certificate path that does not exist. If you do not provide a certificate, the build proceeds without proxy support.
+
+**Note on intercepting proxies:** When using an intercepting proxy, the proxy terminates the TLS connection and re-encrypts it with its own certificate. This means you are trusting the proxy to properly validate the original server's certificate. In GitHub's hosted environments, this validation is performed by GitHub's infrastructure.
