@@ -27,6 +27,10 @@
 #                            downloaded key's fingerprint doesn't match.
 #                            Example: 798AEC654E5C15428C8E42EEAA16FCBCA621E701
 #
+# Environment Variables:
+#   SKIP_SSL_VERIFY - Set to "true" to skip SSL certificate verification.
+#                     Defaults to "false". Used in environments with SSL interception.
+#
 # Example Usage:
 #   ./apt_install_thirdparty \
 #       "https://apt.releases.hashicorp.com/gpg" \
@@ -43,8 +47,15 @@ EXE_NAME=$2
 KEYRING_PATH="/usr/share/keyrings/${EXE_NAME}.gpg"
 APT_SOURCE=$3
 EXPECTED_FINGERPRINT=${4:-}
+SKIP_SSL_VERIFY=${SKIP_SSL_VERIFY:-false}
 
-wget --no-check-certificate -v -O- "${GPG_KEY_URL}" | gpg --dearmor -o "${KEYRING_PATH}"
+# Determine wget SSL options based on environment
+WGET_SSL_OPTS=""
+if [ "$SKIP_SSL_VERIFY" = "true" ]; then
+  WGET_SSL_OPTS="--no-check-certificate"
+fi
+
+wget $WGET_SSL_OPTS -v -O- "${GPG_KEY_URL}" | gpg --dearmor -o "${KEYRING_PATH}"
 
 ## Print the fingerprint of the key
 gpg --no-default-keyring --keyring "${KEYRING_PATH}" --fingerprint
@@ -67,11 +78,13 @@ fi
 ## Set up the apt source list
 echo "deb [signed-by=${KEYRING_PATH}] ${APT_SOURCE}" > /etc/apt/sources.list.d/${EXE_NAME}.list
 
-## Configure apt to skip SSL verification for this source (GPG verification still applies)
-cat > /etc/apt/apt.conf.d/99${EXE_NAME}-no-check-cert <<EOF
+## Configure apt to skip SSL verification for this source if needed (GPG verification still applies)
+if [ "$SKIP_SSL_VERIFY" = "true" ]; then
+  cat > /etc/apt/apt.conf.d/99${EXE_NAME}-no-check-cert <<EOF
 Acquire::https::$(echo "${APT_SOURCE}" | awk '{print $1}' | sed 's|https://||' | cut -d'/' -f1)::Verify-Peer "false";
 Acquire::https::$(echo "${APT_SOURCE}" | awk '{print $1}' | sed 's|https://||' | cut -d'/' -f1)::Verify-Host "false";
 EOF
+fi
 
 apt-get update
 apt-get install -y --no-install-recommends "${EXE_NAME}"

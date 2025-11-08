@@ -4,6 +4,7 @@ FROM docker.io/ubuntu:latest
 
 ARG BUILD_DATE
 ARG VCS_REF
+ARG SKIP_SSL_VERIFY=false
 
 LABEL org.opencontainers.image.title="terraform-bootstrap-gcp"
 LABEL org.opencontainers.image.description="This repository contains a container image build (Dockerfile).\nThe image is for use in VSCode in GitHub Codespaces and GitHub actions. We want to produce a single image that works well with both.\nThis image MUST follow good practice for building images, and MUST follow good practices for securing images.\n\nThe image will be rebuilt on a daily basis, and must pick up the latest updates as part of that rebuild.\n\nThe image supports Python 3-based development and should use the latest version of Python available.\nIt also includes the latest version of the gcloud command line tools."
@@ -18,6 +19,7 @@ COPY scripts/ /tmp/scripts/
 # Install third party software
 # Point gcloud tooling at installed python and delete bundled python (removed cryptography vulnerability, reduces image size)
 ENV CLOUDSDK_PYTHON=/usr/bin/python
+ENV SKIP_SSL_VERIFY=${SKIP_SSL_VERIFY}
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends gnupg lsb-release wget \
@@ -39,6 +41,7 @@ COPY requirements.txt .
 RUN VENV_PATH=$(mktemp -d) \
     && python3 -m venv "$VENV_PATH" \
     && . "$VENV_PATH"/bin/activate \
+    && if [ "$SKIP_SSL_VERIFY" = "true" ]; then pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"; fi \
     && pip install -r requirements.txt \
     && pip freeze > .preinstalled_requirements.txt \
     && rm -rf "$VENV_PATH" \
