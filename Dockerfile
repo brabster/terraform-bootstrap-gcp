@@ -4,6 +4,7 @@ FROM docker.io/ubuntu:rolling
 
 ARG BUILD_DATE
 ARG VCS_REF
+ARG PROXY_CERT_PATH
 
 LABEL org.opencontainers.image.title="terraform-bootstrap-gcp"
 LABEL org.opencontainers.image.description="This repository contains a container image build (Dockerfile).\nThe image is for use in VSCode in GitHub Codespaces and GitHub actions. We want to produce a single image that works well with both.\nThis image MUST follow good practice for building images, and MUST follow good practices for securing images.\n\nThe image will be rebuilt on a daily basis, and must pick up the latest updates as part of that rebuild.\n\nThe image supports Python 3-based development and should use the latest version of Python available.\nIt also includes the latest version of the gcloud command line tools."
@@ -17,12 +18,20 @@ COPY scripts/ /tmp/scripts/
 
 # Install third party software
 # Point gcloud tooling at installed python and delete bundled python (removed cryptography vulnerability, reduces image size)
+# Install proxy certificate if provided (for environments with intercepting proxies)
+# Use: docker build --secret id=proxy_cert,src=/path/to/cert.pem ...
 ENV CLOUDSDK_PYTHON=/usr/bin/python
-RUN apt-get update \
+RUN --mount=type=secret,id=proxy_cert,required=false \
+    chmod +x /tmp/scripts/* \
+    && if [ -f /run/secrets/proxy_cert ]; then \
+        /tmp/scripts/install_proxy_cert.sh /run/secrets/proxy_cert; \
+    else \
+        /tmp/scripts/install_proxy_cert.sh ""; \
+    fi \
+    && apt-get update \
     && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends gnupg lsb-release wget \
     && rm -rf /var/lib/apt/lists/* \
-    && chmod +x /tmp/scripts/* \
     && /tmp/scripts/setup_python.sh \
     && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
     && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \

@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - Support for intercepting proxy environments
+
+### Added
+
+- Added support for building Docker images in environments with intercepting proxies, such as GitHub Copilot coding agent environments.
+- New script `scripts/install_proxy_cert.sh` to install custom CA certificates into the system trust store during Docker build.
+- New script `scripts/build_with_proxy.sh` to simplify building with proxy certificate support.
+- Updated Dockerfile to accept an optional `proxy_cert` build secret for injecting proxy CA certificates.
+- Updated README with instructions for building with intercepting proxy support.
+
+### Security
+
+- The proxy certificate installation is strictly opt-in and requires manual configuration.
+- Build fails with a clear error message if a certificate path is specified but the file does not exist.
+- No automatic detection or configuration to prevent accidental trust of unintended certificates.
+- When using an intercepting proxy, trust is placed in the proxy to perform TLS validation with source systems. In GitHub's hosted environments, this validation is performed by GitHub's infrastructure.
+
 ## [[#14](https://github.com/brabster/terraform-bootstrap-gcp/pull/14)] - Set Up Copilot Instructions
 
 ### Added
