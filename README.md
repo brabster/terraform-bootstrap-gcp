@@ -105,13 +105,9 @@ docker build -t candidate_image:latest .
 
 ### Building with intercepting proxy support
 
-If you are building in an environment with an intercepting proxy (such as GitHub Copilot), you need to provide the proxy's CA certificate. Use the build script provided:
+If you are building in an environment with an intercepting proxy (such as GitHub Copilot), you need to provide the proxy's CA certificate:
 
 ```sh
-# Build with proxy certificate
-./scripts/build_with_proxy.sh /path/to/proxy-ca.pem
-
-# Or build directly with Docker
 DOCKER_BUILDKIT=1 docker build \
   --secret id=proxy_cert,src=/path/to/proxy-ca.pem \
   -t candidate_image:latest \

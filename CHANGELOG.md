@@ -10,7 +10,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added support for building Docker images in environments with intercepting proxies, such as GitHub Copilot coding agent environments.
 - New script `scripts/install_proxy_cert.sh` to install custom CA certificates into the system trust store during Docker build.
-- New script `scripts/build_with_proxy.sh` to simplify building with proxy certificate support.
 - Updated Dockerfile to accept an optional `proxy_cert` build secret for injecting proxy CA certificates.
 - Updated README with instructions for building with intercepting proxy support.
 
