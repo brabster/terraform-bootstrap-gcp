@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [[#CURRENT_PR](https://github.com/brabster/terraform-bootstrap-gcp/pull/CURRENT_PR)] - Fix build failures in Copilot environment with auto-detection of intercepting proxy
+## [[#32](https://github.com/brabster/terraform-bootstrap-gcp/pull/32)] - Fix build failures in Copilot environment with auto-detection of intercepting proxy
 
 ### Added
 
