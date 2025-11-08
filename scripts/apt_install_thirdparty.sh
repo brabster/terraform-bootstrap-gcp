@@ -37,7 +37,25 @@ EXE_NAME=$2
 KEYRING_PATH="/usr/share/keyrings/${EXE_NAME}.gpg"
 APT_SOURCE=$3
 
-wget -q -O- "${GPG_KEY_URL}" | gpg --dearmor -o "${KEYRING_PATH}"
+echo "Downloading GPG key from ${GPG_KEY_URL}..."
+if ! wget -O- "${GPG_KEY_URL}" 2>/tmp/wget_error_$$.txt | gpg --dearmor -o "${KEYRING_PATH}" 2>/tmp/gpg_error_$$.txt; then
+    echo "Error: Failed to download or process GPG key from ${GPG_KEY_URL}" >&2
+    if [[ -f /tmp/wget_error_$$.txt ]]; then
+        echo "wget error output:" >&2
+        cat /tmp/wget_error_$$.txt >&2
+    fi
+    if [[ -f /tmp/gpg_error_$$.txt ]]; then
+        echo "gpg error output:" >&2
+        cat /tmp/gpg_error_$$.txt >&2
+    fi
+    echo "" >&2
+    echo "This may be caused by an intercepting proxy that requires a trusted certificate." >&2
+    echo "If building in an environment with an intercepting proxy (like GitHub Copilot)," >&2
+    echo "ensure the proxy certificate is provided to the build." >&2
+    rm -f /tmp/wget_error_$$.txt /tmp/gpg_error_$$.txt
+    exit 1
+fi
+rm -f /tmp/wget_error_$$.txt /tmp/gpg_error_$$.txt
 
 ## Print the fingerprint of the key
 gpg --no-default-keyring --keyring "${KEYRING_PATH}" --fingerprint
