@@ -19,15 +19,30 @@ COPY scripts/ /tmp/scripts/
 # Install third party software
 # Point gcloud tooling at installed python and delete bundled python (removed cryptography vulnerability, reduces image size)
 # Install proxy certificate if provided (for environments with intercepting proxies)
+#
+# Implementation note: We use --mount=type=secret for the certificate because:
+# - It keeps the certificate out of the build context (avoiding context pollution)
+# - It keeps the certificate out of image layers and build cache (security best practice)
+# - It supports optional mounting with required=false (bind mounts require the file to exist)
+# - Despite the name, "secret" mounts are the standard BuildKit mechanism for securely
+#   injecting files that shouldn't be cached or embedded in images
+#
+# Alternative approaches considered and rejected:
+# - COPY: Would require certificate in build context, pollutes context with environment-specific files,
+#   and embeds the certificate in image layers
+# - ARG with COPY: Same issues as COPY, plus exposes path in image metadata
+# - --mount=type=bind: Cannot be made optional (required=false not supported for bind mounts as of BuildKit v0.11)
+#   Would fail the build if certificate path is not provided
+#
+# While the certificate itself is not secret (it's a public CA certificate), the "secret" mount type
+# is used here for its technical properties (optional, not cached, not in final image) rather than
+# for confidentiality.
+#
 # Use: docker build --secret id=proxy_cert,src=/path/to/cert.pem ...
 ENV CLOUDSDK_PYTHON=/usr/bin/python
 RUN --mount=type=secret,id=proxy_cert,required=false \
     chmod +x /tmp/scripts/* \
-    && if [ -f /run/secrets/proxy_cert ]; then \
-        /tmp/scripts/install_proxy_cert.sh /run/secrets/proxy_cert; \
-    else \
-        /tmp/scripts/install_proxy_cert.sh ""; \
-    fi \
+    && /tmp/scripts/install_proxy_cert.sh "$([ -f /run/secrets/proxy_cert ] && echo /run/secrets/proxy_cert || echo '')" \
     && apt-get update \
     && apt-get -y upgrade \
     && apt-get install -y --no-install-recommends gnupg lsb-release wget \
