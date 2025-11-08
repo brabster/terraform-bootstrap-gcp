@@ -131,6 +131,8 @@ jobs:
     runs-on: ubuntu-latest # maintained by GitHub
     permissions:
       packages: write
+      id-token: write
+      attestations: write
     needs:
       - build_and_load
       - osv_scan
@@ -148,6 +150,7 @@ jobs:
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
     - name: Push tagged image
+      id: push
       env:
         DOCKER_SHA_TAG: ghcr.io/${{ github.repository }}:${{ github.sha }}
         DOCKER_LATEST_TAG: ghcr.io/${{ github.repository }}:latest
@@ -157,4 +160,28 @@ jobs:
           docker tag candidate_image:latest $tag
           docker push $tag
         done
+        # Capture image digest for attestation
+        echo "digest=$(docker inspect --format='{{index .RepoDigests 0}}' $DOCKER_SHA_TAG | cut -d'@' -f2)" >> $GITHUB_OUTPUT
+
+    - name: Generate SBOM
+      uses: anchore/sbom-action@v0 # maintained by Anchore
+      with:
+        image: ghcr.io/${{ github.repository }}@${{ steps.push.outputs.digest }}
+        format: spdx-json
+        output-file: ${{ runner.temp }}/sbom.json
+
+    - name: Attest build provenance
+      uses: actions/attest-build-provenance@v2 # maintained by GitHub
+      with:
+        subject-name: ghcr.io/${{ github.repository }}
+        subject-digest: ${{ steps.push.outputs.digest }}
+        push-to-registry: true
+
+    - name: Attest SBOM
+      uses: actions/attest-sbom@v1 # maintained by GitHub
+      with:
+        subject-name: ghcr.io/${{ github.repository }}
+        subject-digest: ${{ steps.push.outputs.digest }}
+        sbom-path: ${{ runner.temp }}/sbom.json
+        push-to-registry: true
 

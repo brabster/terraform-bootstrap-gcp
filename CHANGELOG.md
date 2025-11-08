@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+
+- Build attestations for all published container images, including build provenance and Software Bill of Materials (SBOM)
+- Documentation in README on how to verify image attestations using GitHub CLI
+
+### Security
+
+- Published images now include cryptographically signed attestations that provide verifiable proof of:
+  - Source repository and commit used to build the image
+  - Build environment and workflow details
+  - Complete software inventory (SBOM)
+- Attestations enable consumers to verify image authenticity and detect tampering
+- Supports SLSA Level 2 requirements for supply chain security
+
 ## [[#22](https://github.com/brabster/terraform-bootstrap-gcp/pull/22)] - Add support for intercepting proxy certificates in Docker builds
 
 ### Added

@@ -31,6 +31,35 @@ This image relies on the following direct dependencies. Maintainers of these dep
 
 The `dbt-bigquery` Python package and its dependencies are pre-loaded into the `pip` cache to reduce network requests to PyPI.
 
+## Supply chain security
+
+### Build attestations
+
+Every published image includes cryptographically signed attestations that provide:
+
+- **Build provenance**: Verifiable record of how the image was built, including source repository, commit, workflow, and build environment
+- **Software Bill of Materials (SBOM)**: Complete inventory of all software components included in the image
+
+Attestations use [Sigstore](https://www.sigstore.dev/) for signing and follow the [in-toto](https://in-toto.io/) attestation format. They are stored in GitHub's attestation registry and linked to the image.
+
+### Verifying attestations
+
+You can verify an image's attestations using the GitHub CLI:
+
+```sh
+# Verify build provenance
+gh attestation verify oci://ghcr.io/brabster/terraform-bootstrap-gcp:latest --owner brabster
+
+# View the SBOM
+gh attestation verify oci://ghcr.io/brabster/terraform-bootstrap-gcp:latest --owner brabster --format json | jq -r '.verificationResult.statement.predicate.Data' | base64 -d | jq .
+```
+
+This verification confirms:
+- The image was built from this repository
+- The exact commit used to build the image
+- The image was built in GitHub Actions (not on a developer workstation)
+- The image has not been tampered with since it was built
+
 ## Image tagging strategy
 
 The image has two types of tags:
