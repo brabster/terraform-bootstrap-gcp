@@ -26,6 +26,7 @@ COPY scripts/ /tmp/scripts/
 # - It supports optional mounting with required=false (bind mounts require the file to exist)
 # - Despite the name, "secret" mounts are the standard BuildKit mechanism for securely
 #   injecting files that shouldn't be cached or embedded in images
+# - See: https://docs.docker.com/build/building/secrets/
 #
 # Alternative approaches considered and rejected:
 # - COPY: Would require certificate in build context, pollutes context with environment-specific files,
