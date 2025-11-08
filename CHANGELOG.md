@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added bash-completion package to enable git command-line completion in interactive shells. This provides tab completion for git commands, branches, and options, improving the developer experience when using git in the container.
 
+### Security
+
+- **Security Posture Impact:** Neutral. The bash-completion package is a standard Ubuntu package maintained by Canonical, an already trusted maintainer for this project. It provides shell completion functionality only in interactive sessions and does not introduce new network attack surfaces, services, or authentication mechanisms. The package follows the project's supply chain security guidelines and will receive automatic security updates through the Ubuntu package system.
+
 ## [[#22](https://github.com/brabster/terraform-bootstrap-gcp/pull/22)] - Add support for intercepting proxy certificates in Docker builds
 
 ### Added
