@@ -105,7 +105,13 @@ bash scripts/build_image.sh -t candidate_image:latest .
 
 The build script automatically detects GitHub Copilot coding agent environments (using the `COPILOT_API_URL` environment variable) and configures the build to use the intercepting proxy certificate if present.
 
-You can also build directly with docker:
+You can also provide an explicit proxy certificate path as the first argument:
+
+```sh
+bash scripts/build_image.sh /path/to/proxy-ca.pem -t candidate_image:latest .
+```
+
+Or build directly with docker:
 
 ```sh
 docker build -t candidate_image:latest .
@@ -113,7 +119,13 @@ docker build -t candidate_image:latest .
 
 ### Building with intercepting proxy support
 
-If you are building in an environment with an intercepting proxy that is not automatically detected, you can manually provide the proxy's CA certificate:
+If you are building in an environment with an intercepting proxy that is not automatically detected, you can manually provide the proxy's CA certificate using the build script:
+
+```sh
+bash scripts/build_image.sh /path/to/proxy-ca.pem -t candidate_image:latest .
+```
+
+Or directly with Docker BuildKit:
 
 ```sh
 DOCKER_BUILDKIT=1 docker build \
