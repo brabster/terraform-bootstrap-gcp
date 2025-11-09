@@ -87,11 +87,18 @@ To use this image for your development environment in GitHub Codespaces, create 
 **Example: Using the latest image**
 ```json
 {
-  "image": "ghcr.io/brabster/terraform-bootstrap-gcp"
+  "image": "ghcr.io/brabster/terraform-bootstrap-gcp",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
 }
 ```
 
-This configures Codespaces to use the pre-built image, giving you access to all the included tools.
+This configures Codespaces to use the pre-built image, giving you access to all the included tools. The `terminal.integrated.defaultProfile.linux` setting ensures bash is used as the default terminal shell in VSCode.
 
 ## Building the image
 
