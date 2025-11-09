@@ -2,6 +2,8 @@
 
 FROM docker.io/ubuntu:latest
 
+SHELL ["/bin/bash", "-c"]
+
 ARG BUILD_DATE
 ARG VCS_REF
 
