@@ -18,6 +18,7 @@ COPY scripts/ /tmp/scripts/
 # Install third party software
 # Point gcloud tooling at installed python and delete bundled python (removed cryptography vulnerability, reduces image size)
 # Install proxy certificate if provided (for environments with intercepting proxies)
+# Configure bash as the default shell for /bin/sh (Ubuntu uses dash by default)
 #
 # Implementation note: We use --mount=type=secret for the certificate because:
 # - It keeps the certificate out of the build context (avoiding context pollution)
@@ -40,6 +41,13 @@ COPY scripts/ /tmp/scripts/
 # for confidentiality. This is a pragmatic use of the feature for its technical capabilities.
 #
 # Use: docker build --secret id=proxy_cert,src=/path/to/cert.pem ...
+#
+# Shell configuration rationale:
+# Ubuntu uses dash (Debian Almquist Shell) as /bin/sh for POSIX compliance and performance since Ubuntu 6.10.
+# Reference: https://wiki.ubuntu.com/DashAsBinSh
+# For development environments like GitHub Codespaces, bash provides better interactive experience with features
+# like [[ ]] syntax, arrays, and better tab completion. We recreate the /bin/sh symlink to point to bash after
+# all packages are installed to ensure consistent behavior.
 ENV CLOUDSDK_PYTHON=/usr/bin/python
 RUN --mount=type=secret,id=proxy_cert,required=false \
     chmod +x /tmp/scripts/* \
@@ -53,6 +61,7 @@ RUN --mount=type=secret,id=proxy_cert,required=false \
     && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
     && rm -rf /usr/lib/google-cloud-sdk/platform/bundledpythonunix \
     && /tmp/scripts/install_osv_scanner.sh \
+    && ln -sf bash /bin/sh \
     && rm -rf /tmp/scripts
 
 USER ubuntu
