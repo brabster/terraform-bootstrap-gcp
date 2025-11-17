@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - Upgrade pip, setuptools, and wheel to latest versions
+
+### Changed
+
+- Updated Python package installer wheels to use latest versions instead of outdated Ubuntu-provided wheels.
+- Modified `scripts/setup_python.sh` to download and install latest pip, setuptools, and wheel packages to `/usr/share/python-wheels/`.
+- Virtual environments created with `python3 -m venv` now use pip 25.3, setuptools 80.9.0, and wheel 0.45.1 instead of outdated versions.
+
+### Fixed
+
+- Fixed vulnerabilities in pip 24.0 and setuptools 68.1.2 by upgrading to latest versions. Resolves 3 known vulnerabilities identified by OSV-scanner.
+
+### Security
+
+- Eliminated known vulnerabilities in pip and setuptools that were present in Ubuntu's python3-venv package wheels.
+- The build now ensures latest versions of pip, setuptools, and wheel are always used in virtual environments.
+
+  - **Supply Chain Posture Impact:** This change significantly improves the project's supply chain security posture by ensuring that virtual environments always use the latest versions of pip, setuptools, and wheel. Previously, the build relied on outdated wheel files from Ubuntu's python3-venv package, which contained known vulnerabilities. By downloading and replacing these wheels with the latest versions during the build process, we eliminate 3 known vulnerabilities (1 in pip 24.0, 2 in setuptools 68.1.2) and ensure that users automatically receive security updates in these critical Python packaging tools. This aligns with the project's principle of defaulting to rolling/latest versions for automatic security updates.
+  - **Security Posture Impact:** Positive
+
 ## [[#35](https://github.com/brabster/terraform-bootstrap-gcp/pull/36)] - Add git CLI completion support
 
 ### Added
