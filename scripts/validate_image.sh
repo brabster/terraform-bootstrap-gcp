@@ -7,6 +7,24 @@
 
 set -euo pipefail
 
+# Verifies that git CLI completion is available.
+# Exits with a clear error message if check fails.
+check_git_completion() {
+  echo "--- Checking git completion ---"
+  
+  if [[ ! -f /usr/share/bash-completion/completions/git ]]; then
+    echo "Error: Git completion file not found at /usr/share/bash-completion/completions/git" >&2
+    exit 1
+  fi
+  
+  if [[ ! -f /usr/share/bash-completion/bash_completion ]]; then
+    echo "Error: bash-completion not installed" >&2
+    exit 1
+  fi
+  
+  echo "Git completion is available."
+}
+
 # Verifies that the script is running as the expected user ('ubuntu') with
 # the expected UID and GID ('1000').
 # Exits with a clear error message if checks fail.
@@ -53,6 +71,8 @@ main() {
 
   echo "--- Checking osv-scanner ---"
   osv-scanner --version
+
+  check_git_completion
 
   check_user_context
 
