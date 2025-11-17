@@ -21,6 +21,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Fixed issue where git CLI completion was not working in the container. Fixes #8.
 
+### Security
+
+- Making git an explicit dependency improves supply chain transparency by documenting all direct dependencies rather than relying on transitive dependencies.
+
+  - **Supply Chain Posture Impact:** This change improves the project's supply chain security posture by making git a documented, explicit dependency. Previously, git was only installed as a transitive dependency of Terraform, which could lead to unexpected behavior if Terraform's dependencies change. By explicitly declaring git and bash-completion as dependencies (both maintained by Canonical), we ensure that these packages are intentionally included, versioned consistently with the rolling update strategy, and clearly documented for security audits.
+  - **Security Posture Impact:** Positive
+
 ## [[#32](https://github.com/brabster/terraform-bootstrap-gcp/pull/32)] - Fix build failures in Copilot environment with auto-detection of intercepting proxy
 
 ### Added
