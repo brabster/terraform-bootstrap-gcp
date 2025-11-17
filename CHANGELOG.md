@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [[#35](https://github.com/brabster/terraform-bootstrap-gcp/pull/36)] - Add git CLI completion support
+
+### Added
+
+- Git CLI completion now works in interactive bash shells via the bash-completion package.
+- Added bash-completion package (maintained by Canonical) to enable tab completion for git commands.
+- Made git an explicit dependency rather than relying on it as a transitive dependency of Terraform.
+- Added validation check to verify git completion files are present in the image.
+
+### Changed
+
+- Updated dependencies table in README to include git and bash-completion.
+
+### Fixed
+
+- Fixed issue where git CLI completion was not working in the container. Fixes #8.
+
+### Security
+
+- Making git an explicit dependency improves supply chain transparency by documenting all direct dependencies rather than relying on transitive dependencies.
+
+  - **Supply Chain Posture Impact:** This change improves the project's supply chain security posture by making git a documented, explicit dependency. Previously, git was only installed as a transitive dependency of Terraform, which could lead to unexpected behavior if Terraform's dependencies change. By explicitly declaring git and bash-completion as dependencies (both maintained by Canonical), we ensure that these packages are intentionally included, versioned consistently with the rolling update strategy, and clearly documented for security audits.
+  - **Security Posture Impact:** Positive
+
 ## [[#32](https://github.com/brabster/terraform-bootstrap-gcp/pull/32)] - Fix build failures in Copilot environment with auto-detection of intercepting proxy
 
 ### Added

@@ -15,7 +15,7 @@ LABEL org.opencontainers.image.licenses="MIT"
 
 COPY scripts/ /tmp/scripts/
 
-# Install third party software
+# Install third party software, git (Canonical) and bash-completion (Canonical) for git CLI completion
 # Point gcloud tooling at installed python and delete bundled python (removed cryptography vulnerability, reduces image size)
 # Install proxy certificate if provided (for environments with intercepting proxies)
 #
@@ -46,7 +46,7 @@ RUN --mount=type=secret,id=proxy_cert,required=false \
     && /tmp/scripts/install_proxy_cert.sh "$([ -f /run/secrets/proxy_cert ] && echo /run/secrets/proxy_cert || echo '')" \
     && apt-get update \
     && apt-get -y upgrade \
-    && apt-get install -y --no-install-recommends gnupg lsb-release wget \
+    && apt-get install -y --no-install-recommends gnupg lsb-release wget bash-completion git \
     && rm -rf /var/lib/apt/lists/* \
     && /tmp/scripts/setup_python.sh \
     && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
