@@ -2,7 +2,7 @@
 
 This repository produces container images for data-centric development on Google Cloud Platform. The images include Terraform, Google Cloud SDK, and Python. They are designed for use in GitHub Codespaces and GitHub Actions.
 
-**Always review `GEMINI.md` for complete project information, goals, and principles.**
+The container images are used for data processing systems using Python, dbt and GCP. The README file and any other documentation must always reflect what the repository does and how it works. Changes to the README file can be proposed, but must be carefully considered to minimise impact to consumers.
 
 ## Project goals and principles
 
@@ -14,6 +14,12 @@ This repository produces container images for data-centric development on Google
 - Use sentence case for headings, labels, and badges
 - Make minimal changes - don't reformat code unnecessarily
 - Ensure README and documentation always reflect what the project actually does
+- Where possible, ensure that a push to GitHub Actions is not required to exercise and test things and instead capabilities and features can be tested interactively first
+- The number of dependencies must be minimised
+- Trust for a dependency must be determined primarily based on the methods described at https://snyk.io/advisor
+- Trusted maintainers and suppliers take responsibility for the transitive dependencies of their projects. Only direct dependencies need to be considered
+- Each dependency must be annotated at point of inclusion with a comment declaring the maintaining party
+- A list of all direct dependencies and maintaining parties must be called out in a README section
 
 ## Agent environment
 
@@ -42,16 +48,46 @@ The CI/CD pipeline (`.github/workflows/docker-publish.yml`) automatically builds
 - All dependencies must automatically update to latest versions when the image is built
 - Every dependency must be annotated with its maintaining party
 - Only add software from explicitly trusted maintainers
-- Python packages must have a Snyk Advisor package health score greater than 80
-- Review the detailed rules in `prompts/rules/03-supply-chain-security.md`
+- Python packages must have a Snyk Advisor package health score greater than 80 (check at https://snyk.io/advisor/python/packagename)
+- NEVER ADD ANY SOFTWARE FROM A MAINTAINER THAT IS NOT EXPLICITLY TRUSTED
+- Dependencies include: GitHub actions, Docker base images, operating system packages, installed libraries and applications, Python packages, and dbt packages
 
 ## Code style and contribution guidelines
 
-- Follow rules documented in `prompts/rules/` directory
-- Bash scripts must follow practices in `prompts/rules/01-bash-scripting-rules.md`
-- Dockerfile changes must follow `prompts/rules/02-dockerfile-best-practices.md`
 - Commit messages should describe **why** the change was made, not what was changed
 - Test interactively before pushing to GitHub Actions when possible
+- Keep responses concise and to the point
+
+### Bash scripting
+
+- Write scripts that are reliable, maintainable, and secure
+- Scripts should be idempotent, meaning they can be run multiple times with the same outcome
+- Use `set -euo pipefail` to make scripts more robust (fail fast, treat unset variables as errors, fail on pipeline errors)
+- Always start scripts with `#!/bin/env bash` to specify the interpreter
+- Use comments to explain complex logic
+- Break down code into functions to avoid repetition
+- Use clear and descriptive variable names
+- Never hardcode secrets - use environment variables or a secure vault
+- Validate inputs to prevent command injection
+- Use absolute paths for files and commands
+- Use tools like `shellcheck` to identify potential issues
+- Implement logging to help with debugging
+
+### Dockerfile best practices
+
+- Dockerfiles should be clear, concise, and easy to understand
+- Images should be as small as possible while still containing all necessary dependencies
+- Security is a primary concern; images should be secure by default
+- Use official and trusted base images
+- Default to a rolling tag like `latest` or `rolling` to ensure base images are continuously updated (trades stability for security)
+- Employ multi-stage builds to separate build-time dependencies from runtime dependencies
+- Minimize the number of layers by combining related commands
+- Use a `.dockerignore` file to exclude unnecessary files
+- Avoid running containers as the root user - create and switch to a non-root user
+- Each new command should be on a new line with appropriate continuation characters (`\` and `&&`)
+- Use `COPY` instead of `ADD` unless you need ADD's specific features
+- Keep image dependencies to a minimum
+- Never store secrets in Dockerfiles
 
 ## Code quality and refactoring
 
@@ -74,7 +110,6 @@ The AI performing a pull request review is an expert in modern engineering pract
 
 Code reviews must include:
 
-- review of `GEMINI.md` to understand the goals and style of the project
 - a review of what has changed for any security issues or improvements that could be made
 - whether the `CHANGELOG.md` file includes the current PR. If it does not, the reviewer should propose an entry for the PR, following the layout and content of existing entries
 - whether the `README.md` file reflects what the project actually does
