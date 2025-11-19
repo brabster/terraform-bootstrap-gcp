@@ -81,6 +81,17 @@ Code reviews must include:
 
 The reviewer must strive to identify impactful changes, rather than cosmetic or stylistic changes.
 
+## Changelog requirements
+
+All changelog entries must include:
+
+- A **Security** section that analyzes the security posture impact of the change
+- The security analysis should include:
+  - Direct security implications of the change (e.g., reduced attack surface, improved authentication)
+  - **Supply Chain Posture Impact** or **Threat Model Impact** subsection explaining how the change affects security
+  - **Security Posture Impact** conclusion (Positive, Neutral, or Negative)
+- See existing entries in `CHANGELOG.md` for examples of the required format and level of detail
+
 ## Responding to review feedback
 
 When addressing code review comments:

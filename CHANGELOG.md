@@ -20,6 +20,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 The cache warming provided minimal benefit while adding complexity to the build process and image size. Users can install dbt-bigquery and other Python packages as needed for their specific use case.
 
+### Security
+
+- Removing pre-installed Python packages reduces the attack surface by eliminating dependencies that may not be needed by all users.
+- Simplifies the supply chain by removing dbt-bigquery and its transitive dependencies from the image.
+
+  - **Supply Chain Posture Impact:** This change improves the project's supply chain security posture by removing unnecessary dependencies from the base image. Users now explicitly install only the Python packages they need, reducing the number of packages that must be monitored for vulnerabilities. This aligns with the principle of minimal dependencies and reduces the image's attack surface.
+  - **Security Posture Impact:** Positive
+
 ## [[#35](https://github.com/brabster/terraform-bootstrap-gcp/pull/36)] - Add git CLI completion support
 
 ### Added
