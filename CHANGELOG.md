@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - Remove dbt-bigquery cache warming
+
+### Removed
+
+- Removed dbt-bigquery cache warming from the Docker build process.
+- Deleted requirements.txt file used for pre-warming the pip cache.
+- Removed dbt-bigquery from the dependencies table in README as it is no longer pre-installed.
+
+### Changed
+
+- Updated README to remove documentation about pre-warmed pip cache for dbt-bigquery.
+
+### Rationale
+
+The cache warming provided minimal benefit while adding complexity to the build process and image size. Users can install dbt-bigquery and other Python packages as needed for their specific use case.
+
 ## [[#35](https://github.com/brabster/terraform-bootstrap-gcp/pull/36)] - Add git CLI completion support
 
 ### Added
