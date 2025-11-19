@@ -68,7 +68,7 @@ jobs:
 
     - name: Upload OSV scan results to Code Scanning
       if: ${{ always() }}
-      uses: github/codeql-action/upload-sarif@v3  # maintained by GitHub
+      uses: github/codeql-action/upload-sarif@v4  # maintained by GitHub
       with:
         sarif_file: osv_scan_results.sarif
 
