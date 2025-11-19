@@ -1,6 +1,6 @@
 ## Project overview
 
-This repository produces container images for data-centric development on Google Cloud Platform. The images include Terraform, Google Cloud SDK, Python, and dbt-bigquery. They are designed for use in GitHub Codespaces and GitHub Actions.
+This repository produces container images for data-centric development on Google Cloud Platform. The images include Terraform, Google Cloud SDK, and Python. They are designed for use in GitHub Codespaces and GitHub Actions.
 
 **Always review `GEMINI.md` for complete project information, goals, and principles.**
 
