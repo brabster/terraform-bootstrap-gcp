@@ -1,6 +1,6 @@
 ## Project overview
 
-This repository produces container images for data-centric development on Google Cloud Platform. The images include Terraform, Google Cloud SDK, Python, and dbt-bigquery. They are designed for use in GitHub Codespaces and GitHub Actions.
+This repository produces container images for data-centric development on Google Cloud Platform. The images include Terraform, Google Cloud SDK, and Python. They are designed for use in GitHub Codespaces and GitHub Actions.
 
 **Always review `GEMINI.md` for complete project information, goals, and principles.**
 
@@ -80,6 +80,17 @@ Code reviews must include:
 - whether the `README.md` file reflects what the project actually does
 
 The reviewer must strive to identify impactful changes, rather than cosmetic or stylistic changes.
+
+## Changelog requirements
+
+All changelog entries must include:
+
+- A **Security** section that analyzes the security posture impact of the change
+- The security analysis should include:
+  - Direct security implications of the change (e.g., reduced attack surface, improved authentication)
+  - **Supply Chain Posture Impact** or **Threat Model Impact** subsection explaining how the change affects security
+  - **Security Posture Impact** conclusion (Positive, Neutral, or Negative)
+- See existing entries in `CHANGELOG.md` for examples of the required format and level of detail
 
 ## Responding to review feedback
 

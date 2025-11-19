@@ -30,7 +30,7 @@ refinement: |
   - The plan depends on the user/group configuration of the `docker.io/ubuntu:rolling` base image.
 
 - **Potential Issues & Mitigations:**
-  - **File Permissions:** Processes inside the container will run as the `ubuntu` user. The `Dockerfile` creates a pre-warmed pip cache, which will now be owned by `ubuntu`. This is the desired behavior and is not expected to cause issues.
+  - **File Permissions:** Processes inside the container will run as the `ubuntu` user. This is the desired behavior and is not expected to cause issues.
   - **Dev Container Context:** There is no direct impact on the dev container or Codespaces, as they use `/.devcontainer/Dockerfile`, which is not being modified. This isolates the change to the production image.
   - **GitHub Actions Context:** The `docker-publish.yml` workflow is not affected by the user change *within* the image it builds. The new verification step will be added to the existing `image_test` job to ensure correctness.
 
