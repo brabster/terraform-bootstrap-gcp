@@ -170,6 +170,11 @@ jobs:
         docker tag candidate_image:latest $DOCKER_SHA_TAG
         PUSH_OUTPUT=$(docker push $DOCKER_SHA_TAG 2>&1)
         DIGEST=$(echo "$PUSH_OUTPUT" | grep -oP 'digest: \K(sha256:[a-f0-9]{64})')
+        if [ -z "$DIGEST" ]; then
+          echo "::error::Failed to extract digest from docker push output"
+          echo "Push output was: $PUSH_OUTPUT"
+          exit 1
+        fi
         echo "digest=$DIGEST" >> $GITHUB_OUTPUT
         # Push the latest tag (same image, so same digest)
         docker tag candidate_image:latest $DOCKER_LATEST_TAG
