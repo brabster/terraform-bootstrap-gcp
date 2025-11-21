@@ -4,7 +4,34 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [[#41](https://github.com/brabster/terraform-bootstrap-gcp/pull/42)] - Remove dbt-bigquery cache warming
+## [[#45](https://github.com/brabster/terraform-bootstrap-gcp/pull/45)] - Add attestation to published Docker images
+
+### Added
+
+- Build provenance attestations for all published Docker images using GitHub's `actions/attest-build-provenance` action.
+- Documentation in README explaining attestation benefits and how consumers can verify image provenance.
+- Instructions for verifying attestations using the GitHub CLI.
+
+### Changed
+
+- Updated the publish job in the docker-publish.yml workflow to include `id-token: write` and `attestations: write` permissions.
+- Modified the image push step to capture the image digest for use in attestation.
+
+### Rationale
+
+Build provenance attestations provide cryptographic proof of an artifact's origin and build process. This enables consumers to verify that images were built by the official GitHub Actions workflow and have not been tampered with. The attestation includes metadata such as the commit SHA, workflow, and build environment, creating an auditable trail for supply chain security.
+
+### Security
+
+- Attestations enable consumers to verify image authenticity before use, reducing the risk of supply chain attacks.
+- Signed attestations create an auditable trail linking published images to their source code and build process.
+- The attestation signature is created using GitHub's OIDC token, which proves the workflow's identity without requiring long-lived credentials.
+- Consumers can integrate attestation verification into their CI/CD pipelines to enforce supply chain security policies.
+
+  - **Supply Chain Posture Impact:** This change significantly improves the supply chain security posture by providing cryptographic proof of provenance for all published artifacts. Attestations enable consumers to verify that images were built by the expected workflow, detect tampering, and establish trust in the build process. This addresses a critical gap in software supply chain security by making the build process transparent and verifiable. The attestations are signed using GitHub's Sigstore infrastructure, which follows industry best practices for artifact signing and verification.
+  - **Security Posture Impact:** Positive
+
+## [[#42](https://github.com/brabster/terraform-bootstrap-gcp/pull/42)] - Remove dbt-bigquery cache warming
 
 ### Removed
 
@@ -28,7 +55,7 @@ The cache warming provided minimal benefit while adding complexity to the build 
   - **Supply Chain Posture Impact:** This change improves the project's supply chain security posture by removing unnecessary dependencies from the base image. Users now explicitly install only the Python packages they need, reducing the number of packages that must be monitored for vulnerabilities. This aligns with the principle of minimal dependencies and reduces the image's attack surface.
   - **Security Posture Impact:** Positive
 
-## [[#35](https://github.com/brabster/terraform-bootstrap-gcp/pull/36)] - Add git CLI completion support
+## [[#36](https://github.com/brabster/terraform-bootstrap-gcp/pull/36)] - Add git CLI completion support
 
 ### Added
 
