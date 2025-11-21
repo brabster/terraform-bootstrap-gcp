@@ -164,12 +164,12 @@ jobs:
         DOCKER_LATEST_TAG: ghcr.io/${{ github.repository }}:latest
       run: |
         docker load -i ${{ runner.temp }}/candidate_image.tar
-        # Tag and push the SHA-tagged version first
+        # Tag and push the SHA-tagged version first, capturing the digest from push output
+        # docker push outputs the digest in the format "sha256-tag: digest: sha256:... size: ..."
+        # We extract the digest directly from this output without depending on docker inspect
         docker tag candidate_image:latest $DOCKER_SHA_TAG
-        docker push $DOCKER_SHA_TAG
-        # Capture the digest from the pushed image's RepoDigests
-        # After pushing, docker inspect populates RepoDigests with the registry digest
-        DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $DOCKER_SHA_TAG | cut -d'@' -f2)
+        PUSH_OUTPUT=$(docker push $DOCKER_SHA_TAG 2>&1)
+        DIGEST=$(echo "$PUSH_OUTPUT" | grep -oP 'digest: \K(sha256:[a-f0-9]{64})')
         echo "digest=$DIGEST" >> $GITHUB_OUTPUT
         # Push the latest tag (same image, so same digest)
         docker tag candidate_image:latest $DOCKER_LATEST_TAG
