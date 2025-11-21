@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [[#23](https://github.com/brabster/terraform-bootstrap-gcp/pull/45)] - Add attestation to published Docker images
+## [[#45](https://github.com/brabster/terraform-bootstrap-gcp/pull/45)] - Add attestation to published Docker images
 
 ### Added
 
@@ -31,7 +31,7 @@ Build provenance attestations provide cryptographic proof of an artifact's origi
   - **Supply Chain Posture Impact:** This change significantly improves the supply chain security posture by providing cryptographic proof of provenance for all published artifacts. Attestations enable consumers to verify that images were built by the expected workflow, detect tampering, and establish trust in the build process. This addresses a critical gap in software supply chain security by making the build process transparent and verifiable. The attestations are signed using GitHub's Sigstore infrastructure, which follows industry best practices for artifact signing and verification.
   - **Security Posture Impact:** Positive
 
-## [[#41](https://github.com/brabster/terraform-bootstrap-gcp/pull/42)] - Remove dbt-bigquery cache warming
+## [[#42](https://github.com/brabster/terraform-bootstrap-gcp/pull/42)] - Remove dbt-bigquery cache warming
 
 ### Removed
 
@@ -55,7 +55,7 @@ The cache warming provided minimal benefit while adding complexity to the build 
   - **Supply Chain Posture Impact:** This change improves the project's supply chain security posture by removing unnecessary dependencies from the base image. Users now explicitly install only the Python packages they need, reducing the number of packages that must be monitored for vulnerabilities. This aligns with the principle of minimal dependencies and reduces the image's attack surface.
   - **Security Posture Impact:** Positive
 
-## [[#35](https://github.com/brabster/terraform-bootstrap-gcp/pull/36)] - Add git CLI completion support
+## [[#36](https://github.com/brabster/terraform-bootstrap-gcp/pull/36)] - Add git CLI completion support
 
 ### Added
 
