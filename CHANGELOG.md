@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - Add attestation to published Docker images
+## [[#23](https://github.com/brabster/terraform-bootstrap-gcp/pull/45)] - Add attestation to published Docker images
 
 ### Added
 
