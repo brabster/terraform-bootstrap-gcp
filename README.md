@@ -37,6 +37,32 @@ The image has two types of tags:
 - **`latest`**: This tag always points to the most recent daily build.
 - **git SHA**: A tag with the git SHA of the commit that triggered the build is created for each build. This allows for pinning to a specific version of the image should the need arise.
 
+## Supply chain security
+
+Each published image includes a cryptographically signed attestation that provides build provenance information. This attestation proves that the image was built by this repository's GitHub Actions workflow and allows you to verify the image before use.
+
+### Benefits of attestation
+
+- **Authenticity**: Verify that the image was built by the official workflow, not by an unauthorised party.
+- **Integrity**: Confirm that the image content has not been tampered with since it was built.
+- **Transparency**: Access build metadata including the exact commit, workflow, and build environment that produced the image.
+- **Compliance**: Meet supply chain security requirements for your organisation or regulatory framework.
+
+### Verifying attestations
+
+You can verify the attestation using the GitHub CLI:
+
+```sh
+gh attestation verify oci://ghcr.io/brabster/terraform-bootstrap-gcp:latest --owner brabster
+```
+
+This command checks that:
+1. The attestation signature is valid and was created by GitHub Actions.
+2. The image digest matches the attested content.
+3. The attestation was created by a workflow in this repository.
+
+For automated verification in your CI/CD pipeline, see [GitHub's attestation documentation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds).
+
 ## How to use
 
 ### GitHub container registry

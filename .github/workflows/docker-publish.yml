@@ -131,6 +131,14 @@ jobs:
     runs-on: ubuntu-latest # maintained by GitHub
     permissions:
       packages: write
+      # id-token: write is required for generating attestations using GitHub's OIDC token
+      # This allows the workflow to prove its identity to the attestation service
+      # Reference: https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect
+      id-token: write
+      # attestations: write is required to publish attestations to the repository
+      # This permission allows the workflow to write attestation data associated with the published artifacts
+      # Reference: https://github.com/actions/attest-build-provenance#permissions
+      attestations: write
     needs:
       - build_and_load
       - osv_scan
@@ -147,7 +155,10 @@ jobs:
     - name: Log in to the Container registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+    # Push the image and capture its digest for attestation
+    # The digest uniquely identifies the image content and is required for attestation
     - name: Push tagged image
+      id: push
       env:
         DOCKER_SHA_TAG: ghcr.io/${{ github.repository }}:${{ github.sha }}
         DOCKER_LATEST_TAG: ghcr.io/${{ github.repository }}:latest
@@ -157,4 +168,32 @@ jobs:
           docker tag candidate_image:latest $tag
           docker push $tag
         done
+        # Capture the image digest for attestation
+        # The digest is the sha256 hash of the image content
+        DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $DOCKER_SHA_TAG | cut -d'@' -f2)
+        echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+
+    # Generate build provenance attestations for the published Docker images
+    # This creates cryptographically signed attestations that prove:
+    # 1. The image was built by this specific GitHub Actions workflow
+    # 2. The image digest matches what was produced by the workflow
+    # 3. Build metadata including workflow, repository, and commit information
+    #
+    # The attestation is signed using GitHub's Sigstore infrastructure and stored
+    # in the repository's attestations, allowing consumers to verify the provenance
+    # of the image before use.
+    #
+    # Consumers can verify the attestation using:
+    # gh attestation verify oci://ghcr.io/brabster/terraform-bootstrap-gcp:latest --owner brabster
+    #
+    # Reference: https://github.com/actions/attest-build-provenance
+    - name: Attest build provenance
+      uses: actions/attest-build-provenance@v2 # maintained by GitHub
+      with:
+        # Attest the image by its name and digest
+        # Using the digest ensures the attestation is tied to the exact image content
+        # rather than a mutable tag
+        subject-name: ghcr.io/${{ github.repository }}
+        subject-digest: ${{ steps.push.outputs.digest }}
+        push-to-registry: true
 
