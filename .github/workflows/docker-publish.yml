@@ -163,12 +163,13 @@ jobs:
         DOCKER_SHA_TAG: ghcr.io/${{ github.repository }}:${{ github.sha }}
         DOCKER_LATEST_TAG: ghcr.io/${{ github.repository }}:latest
       run: |
+        set -euo pipefail
         docker load -i ${{ runner.temp }}/candidate_image.tar
         # Tag and push the SHA-tagged version first, capturing the digest from push output
-        # docker push outputs the digest in the format "sha256-tag: digest: sha256:... size: ..."
+        # docker push outputs the digest in the format "digest: sha256:... size: ..."
         # We extract the digest directly from this output without depending on docker inspect
         docker tag candidate_image:latest $DOCKER_SHA_TAG
-        PUSH_OUTPUT=$(docker push $DOCKER_SHA_TAG 2>&1)
+        PUSH_OUTPUT=$(docker push $DOCKER_SHA_TAG)
         DIGEST=$(echo "$PUSH_OUTPUT" | grep -oP 'digest: \K(sha256:[a-f0-9]{64})')
         if [ -z "$DIGEST" ]; then
           echo "::error::Failed to extract digest from docker push output"
