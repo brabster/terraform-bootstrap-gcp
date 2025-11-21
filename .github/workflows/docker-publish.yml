@@ -127,6 +127,16 @@ jobs:
             echo "Wrapper script failed as expected for a non-existent image."
           fi
 
+  test_push_and_get_digest:
+    runs-on: ubuntu-latest # maintained by GitHub
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4 # maintained by GitHub
+
+      - name: Test push_and_get_digest.sh script
+        run: bash scripts/test_push_and_get_digest.sh
+
   publish:
     runs-on: ubuntu-latest # maintained by GitHub
     permissions:
@@ -144,7 +154,10 @@ jobs:
       - osv_scan
       - image_test
       - test_osv_scanner_wrapper
+      - test_push_and_get_digest
     steps:
+
+    - uses: actions/checkout@v3 # maintained by GitHub
 
     - name: Download image artifact
       uses: actions/download-artifact@v4 # maintained by GitHub
@@ -157,6 +170,7 @@ jobs:
 
     # Push the image and capture its digest for attestation
     # The digest uniquely identifies the image content and is required for attestation
+    # This step uses scripts/push_and_get_digest.sh which can be tested locally
     - name: Push tagged image
       id: push
       env:
@@ -164,16 +178,13 @@ jobs:
         DOCKER_LATEST_TAG: ghcr.io/${{ github.repository }}:latest
       run: |
         docker load -i ${{ runner.temp }}/candidate_image.tar
-        # Tag and push the SHA-tagged version first, capturing the digest from push output
-        # docker push outputs the digest in the format "sha256-tag: digest: sha256:... size: ..."
-        # We extract the digest directly from this output without depending on docker inspect
-        docker tag candidate_image:latest $DOCKER_SHA_TAG
-        PUSH_OUTPUT=$(docker push $DOCKER_SHA_TAG 2>&1)
-        DIGEST=$(echo "$PUSH_OUTPUT" | grep -oP 'digest: \K(sha256:[a-f0-9]{64})')
+        # Use the push_and_get_digest.sh script to push and extract the digest
+        # This script is tested independently and can be validated locally before pushing to CI
+        DIGEST=$(bash ${{ github.workspace }}/scripts/push_and_get_digest.sh \
+          candidate_image:latest \
+          $DOCKER_SHA_TAG \
+          $DOCKER_LATEST_TAG)
         echo "digest=$DIGEST" >> $GITHUB_OUTPUT
-        # Push the latest tag (same image, so same digest)
-        docker tag candidate_image:latest $DOCKER_LATEST_TAG
-        docker push $DOCKER_LATEST_TAG
 
     # Generate build provenance attestations for the published Docker images
     # This creates cryptographically signed attestations that prove:

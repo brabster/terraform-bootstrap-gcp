@@ -136,3 +136,21 @@ bash scripts/build_image.sh /path/to/proxy-ca.pem -t candidate_image:latest .
 ```
 
 **Note on intercepting proxies:** When using an intercepting proxy, the proxy terminates the TLS connection and re-encrypts it with its own certificate. This means you are trusting the proxy to properly validate the original server's certificate. In GitHub's hosted environments, this validation is performed by GitHub's infrastructure.
+
+### Testing locally
+
+The project includes scripts that can be tested independently before pushing to GitHub Actions:
+
+**Test push and digest extraction:**
+```sh
+# Start a local Docker registry
+docker run -d -p 5000:5000 --name test-registry registry:2
+
+# Build the image
+bash scripts/build_image.sh -t candidate_image:latest .
+
+# Test the push and digest extraction script
+bash scripts/test_push_and_get_digest.sh
+```
+
+This test suite validates that the digest extraction logic works correctly with a local registry, ensuring the CI pipeline will function as expected.

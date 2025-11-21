@@ -9,17 +9,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Build provenance attestations for all published Docker images using GitHub's `actions/attest-build-provenance` action.
+- New script `scripts/push_and_get_digest.sh` that handles image pushing and digest extraction, enabling local testing.
+- Comprehensive test suite `scripts/test_push_and_get_digest.sh` that validates digest extraction logic using a local Docker registry.
+- New test job in CI pipeline that runs the digest extraction tests before publishing.
 - Documentation in README explaining attestation benefits and how consumers can verify image provenance.
 - Instructions for verifying attestations using the GitHub CLI.
+- Documentation for testing the push and digest extraction locally.
 
 ### Changed
 
 - Updated the publish job in the docker-publish.yml workflow to include `id-token: write` and `attestations: write` permissions.
-- Modified the image push step to capture the image digest for use in attestation.
+- Refactored image push step to use `scripts/push_and_get_digest.sh` script instead of inline bash commands.
+- Image digest is now extracted by parsing `docker push` output, eliminating dependency on `docker inspect`.
+- Push and digest extraction logic can now be tested locally before pushing to GitHub Actions.
 
 ### Rationale
 
 Build provenance attestations provide cryptographic proof of an artifact's origin and build process. This enables consumers to verify that images were built by the official GitHub Actions workflow and have not been tampered with. The attestation includes metadata such as the commit SHA, workflow, and build environment, creating an auditable trail for supply chain security.
+
+Extracting the push and digest logic to a dedicated script aligns with the project principle of testing capabilities locally before pushing to GitHub Actions. This reduces iteration time and increases confidence in CI changes.
 
 ### Security
 
@@ -27,8 +35,10 @@ Build provenance attestations provide cryptographic proof of an artifact's origi
 - Signed attestations create an auditable trail linking published images to their source code and build process.
 - The attestation signature is created using GitHub's OIDC token, which proves the workflow's identity without requiring long-lived credentials.
 - Consumers can integrate attestation verification into their CI/CD pipelines to enforce supply chain security policies.
+- Digest extraction no longer depends on the Docker service's inspect API, reducing external dependencies.
+- Comprehensive local testing ensures the digest extraction logic works correctly before deployment.
 
-  - **Supply Chain Posture Impact:** This change significantly improves the supply chain security posture by providing cryptographic proof of provenance for all published artifacts. Attestations enable consumers to verify that images were built by the expected workflow, detect tampering, and establish trust in the build process. This addresses a critical gap in software supply chain security by making the build process transparent and verifiable. The attestations are signed using GitHub's Sigstore infrastructure, which follows industry best practices for artifact signing and verification.
+  - **Supply Chain Posture Impact:** This change significantly improves the supply chain security posture by providing cryptographic proof of provenance for all published artifacts. Attestations enable consumers to verify that images were built by the expected workflow, detect tampering, and establish trust in the build process. This addresses a critical gap in software supply chain security by making the build process transparent and verifiable. The attestations are signed using GitHub's Sigstore infrastructure, which follows industry best practices for artifact signing and verification. The ability to test attestation-related logic locally improves the reliability and auditability of the CI pipeline.
   - **Security Posture Impact:** Positive
 
 ## [[#41](https://github.com/brabster/terraform-bootstrap-gcp/pull/42)] - Remove dbt-bigquery cache warming
