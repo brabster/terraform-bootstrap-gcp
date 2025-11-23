@@ -476,16 +476,10 @@ These improvements do not close the attestation gap completely, but they:
 **Approach:** Switch to a different base image that provides attestations (e.g., Google's Distroless, Chainguard)
 
 **Investigated in detail (see "Investigation of alternative base images" section):**
-- Chainguard images: Use APK instead of APT, complete rewrite required
-- Google Distroless: No package manager, cannot install required tools
-- Red Hat UBI: RPM-based, different ecosystem
-- Debian: Same verification limitations as Ubuntu
-- Ubuntu via alternative registries: No attestations available
+Comprehensive analysis of Chainguard, Google Distroless, Red Hat UBI, Debian, and alternative registries.
 
 **Rejected because:**
-- No alternative provides both Ubuntu/APT compatibility AND better verification
-- All options either require complete architecture rewrite or provide no security benefit
-- Maintains current approach as the least complex option with acceptable trust model
+No alternative provides both Ubuntu/APT compatibility and better verification. All options either require complete architecture rewrite (different package managers) or provide no security benefit over current approach.
 
 ## Implementation plan
 
