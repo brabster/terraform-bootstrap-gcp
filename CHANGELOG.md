@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Pending] - Document and improve base image chain of trust
+
+### Added
+
+- Comprehensive analysis document explaining the base image chain of trust in `research/base-image-chain-of-trust.md`.
+- CI workflow step to capture and log the base image digest used in each build, creating an audit trail.
+- Documentation in README explaining the trust model for the base image.
+- Guidance in README on verifying Ubuntu base images using Docker Content Trust.
+
+### Changed
+
+- Corrected dependencies table in README to show `ubuntu:latest` instead of `ubuntu:rolling` (matching the actual Dockerfile).
+
+### Rationale
+
+While this project provides cryptographic attestations for its own build process, the Ubuntu base image from Docker Hub does not provide GitHub-style attestations or easily verifiable cryptographic build provenance. After investigating alternatives including Canonical's GitHub Container Registry images, alternative base images, and various verification approaches, no solution was found that would close this gap without significantly compromising the project's principles of simplicity and automatic updates.
+
+The implemented changes focus on transparency and auditability rather than attempting to create false assurance. By explicitly documenting the trust boundaries and capturing base image digests in CI logs, consumers can make informed decisions about risk while the project maintains its commitment to automatic security updates.
+
+### Security
+
+- **Transparency:** Explicitly documents that base image trust relies on Canonical's reputation and Docker Hub's infrastructure rather than cryptographic attestations.
+- **Auditability:** Creates an audit trail in CI logs showing exactly which base image digest was used for each build.
+- **Consumer guidance:** Provides instructions for consumers who want to verify base image signatures using Docker Content Trust.
+- **Realistic assessment:** Acknowledges the limitation rather than creating false assurance or adding complexity that doesn't actually solve the provenance gap.
+
+  - **Supply Chain Posture Impact:** This change improves transparency about the supply chain security posture without changing the underlying architecture. While the base image chain of trust cannot be fully verified with current tooling and available images, explicitly documenting this limitation enables consumers to make informed risk decisions. The base image digest capture provides an audit trail that can detect unexpected base image changes. The trust model is now explicit: the project's attestations prove the build process, while base image trust relies on Canonical's reputation and Docker Hub's infrastructure. This honest assessment is more valuable than adding complexity that creates false assurance without actually verifying the base image build process.
+  - **Security Posture Impact:** Neutral (improves transparency and auditability without changing security boundaries)
+
 ## [[#45](https://github.com/brabster/terraform-bootstrap-gcp/pull/45)] - Add attestation to published Docker images
 
 ### Added

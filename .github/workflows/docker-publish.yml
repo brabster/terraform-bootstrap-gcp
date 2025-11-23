@@ -21,6 +21,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3 # maintained by GitHub
 
+    - name: Capture base image digest
+      run: |
+        echo "Pulling base image to capture digest for audit trail..."
+        docker pull ubuntu:latest
+        BASE_DIGEST=$(docker inspect ubuntu:latest --format='{{index .RepoDigests 0}}')
+        echo "Base image digest: $BASE_DIGEST"
+        echo "This digest represents the specific version of ubuntu:latest used in this build."
+
     - name: Build and export Docker image
       run: |
         docker build -t candidate_image:latest .

@@ -17,13 +17,35 @@ It is designed for temporary development environments, including:
 
 The base image is `ubuntu:latest`. This tag provides the latest LTS release and is updated automatically when new LTS versions are released. LTS releases receive the same security updates as other Ubuntu releases. This choice avoids compatibility issues with third-party package repositories that may not immediately support newly released Ubuntu versions.
 
+### Trust model
+
+The base image trust relies on Canonical's reputation and Docker Hub's distribution infrastructure. While this project provides cryptographic attestations for its published images, the Ubuntu base image from Docker Hub does not provide GitHub-style attestations or other easily verifiable cryptographic build provenance.
+
+This means:
+- The project's attestations verify the image was built by the specified GitHub Actions workflow
+- The project's attestations verify the source code and build environment used
+- The project's attestations do not verify the provenance of the base Ubuntu image itself
+
+Consumers should evaluate this trust model in the context of their specific security requirements. For a detailed analysis of the base image chain of trust, see [research/base-image-chain-of-trust.md](research/base-image-chain-of-trust.md).
+
+### Base image verification options
+
+Docker Hub's official Ubuntu images are signed with Docker Content Trust. To verify publisher signatures when pulling:
+
+```bash
+export DOCKER_CONTENT_TRUST=1
+docker pull ubuntu:latest
+```
+
+Note: Docker Content Trust verifies the publisher signature but does not provide build provenance information.
+
 ## Dependencies
 
 This image relies on the following direct dependencies. Maintainers of these dependencies are responsible for their transitive dependencies. The latest versions are installed when the image is built.
 
 | Component              | Dependency         | Maintainer                 |
 | ---------------------- | ------------------ | -------------------------- |
-| Base image             | `ubuntu:rolling`   | Canonical                  |
+| Base image             | `ubuntu:latest`    | Canonical                  |
 | Infrastructure as Code | `terraform`        | HashiCorp                  |
 | Cloud SDK              | Google Cloud SDK   | Google                     |
 | Language               | `python`           | Python Software Foundation |
