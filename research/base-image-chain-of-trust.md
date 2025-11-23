@@ -83,6 +83,8 @@ Ubuntu ISO images provide a stronger, more traditional verification model:
 2. **Verification process:**
    ```bash
    # Import Ubuntu signing key from keyserver
+   # NOTE: Verify the key fingerprint from https://ubuntu.com/tutorials/how-to-verify-ubuntu
+   # before importing. The fingerprint below is for Ubuntu 24.04 LTS.
    gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 0x843938DF228D22F7B3742BC0D94AA3F0EFE21092
    
    # Verify the signature on the checksums file
@@ -145,7 +147,7 @@ Docker Hub Ubuntu images have a different verification model:
 
 **Trustworthiness comparison:**
 
-The image built from the Docker Hub base is **equally trustworthy** to an installation from the ISO:
+From a cryptographic standpoint, the image built from the Docker Hub base provides **equivalent trust guarantees** to an installation from the ISO:
 
 1. **Both lack build provenance:** Neither the ISO nor Docker image provides information about how it was built, from what source code, or in what environment. You're trusting Canonical's build process in both cases.
 
@@ -154,6 +156,16 @@ The image built from the Docker Hub base is **equally trustworthy** to an instal
 3. **Both rely on the same authority:** In both cases, you're ultimately trusting Canonical as the publisher and their key management practices.
 
 4. **Both have optional verification:** While ISO verification is documented and encouraged, it's still optional. Similarly, Docker Content Trust is available but not enforced by default.
+
+**Practical differences:**
+
+In practice, ISO verification is more commonly performed:
+- ISO verification is prominently documented on ubuntu.com
+- The verification process is well-known in the Linux community
+- System administrators routinely verify ISO checksums
+- Docker Content Trust is less widely known and rarely enabled
+
+This means that while the cryptographic guarantees are equivalent, ISO installations are more likely to be verified in practice.
 
 **Where Docker images are weaker:**
 
@@ -559,12 +571,7 @@ The chain of trust from the project's source code to published image remains int
 
 ### Why not switch base images?
 
-The investigation of alternative base images revealed that no option provides better security without significant trade-offs:
-- **Chainguard/Wolfi:** Uses APK (incompatible with APT), requires complete rewrite
-- **Distroless:** No package manager, cannot install required tools
-- **Red Hat UBI:** RPM-based ecosystem, large migration effort
-- **Debian:** Same trust limitations as Ubuntu without Ubuntu's benefits
-- **Alternative registries:** Ubuntu images on other registries lack attestations
+As detailed in the "Investigation of alternative base images" section, no viable alternatives exist that provide both Ubuntu/APT compatibility and better cryptographic verification. Switching would require either abandoning Ubuntu's ecosystem or accepting the same verification limitations with a different vendor.
 
 Switching would add complexity without solving the fundamental issue: base image build provenance is not available from any major distribution.
 
