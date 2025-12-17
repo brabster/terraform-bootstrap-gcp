@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [[#TBD](https://github.com/brabster/terraform-bootstrap-gcp/pull/TBD)] - Deduplicate vulnerability reports in GitHub Security tab
+## [[#49](https://github.com/brabster/terraform-bootstrap-gcp/pull/49)] - Deduplicate vulnerability reports in GitHub Security tab
 
 ### Added
 
