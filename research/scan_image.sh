@@ -8,14 +8,16 @@ IMAGE=$1
 SANITIZED_IMAGE_NAME=$(echo "$IMAGE" | tr /: -)
 mkdir -p uncommitted
 SCAN_OUTPUT_FILENAME="uncommitted/${SANITIZED_IMAGE_NAME}.sarif"
+SCAN_OUTPUT_RAW_FILENAME="uncommitted/${SANITIZED_IMAGE_NAME}_raw.sarif"
 METADATA_FILENAME="uncommitted/${SANITIZED_IMAGE_NAME}.json"
 
 # Docker operations
 docker pull "$IMAGE"
 SIZE=$(docker images --format "{{.Size}}" "$IMAGE")
 
-# Scan the image
-osv-scanner scan image --format sarif --output "$SCAN_OUTPUT_FILENAME" "$IMAGE" || true
+# Scan the image and deduplicate results
+"$(dirname "$0")/../scripts/run_osv_scanner.sh" scan image --format sarif --output "$SCAN_OUTPUT_RAW_FILENAME" "$IMAGE"
+"$(dirname "$0")/../scripts/deduplicate_sarif.sh" "$SCAN_OUTPUT_RAW_FILENAME" "$SCAN_OUTPUT_FILENAME"
 
 docker rmi "$IMAGE"
 
