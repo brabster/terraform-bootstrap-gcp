@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [[#55](https://github.com/brabster/terraform-bootstrap-gcp/pull/55)] - Fix Python package vulnerabilities
+
+### Changed
+
+- Upgraded pip and setuptools to latest versions to fix vulnerabilities. Versions are automatically upgraded on each image build to stay current with security patches.
+- Fixed pip 24.0 vulnerability CVE-2025-8869 (GHSA-4xh5-x5gv-qwph).
+- Fixed setuptools 68.1.2 vulnerabilities GHSA-5rjg-fvgr-3xxf, GHSA-cx63-2mw6-8hw5, and PYSEC-2025-49.
+- Modified `scripts/setup_python.sh` to install python3-pip, upgrade pip and setuptools to latest versions using pip with --break-system-packages flag, and remove old vulnerable package files.
+- Added pip and setuptools to README dependencies table.
+
+### Fixed
+
+- Fixed CVE-2025-8869 in pip 24.0: pip's fallback tar extraction doesn't check symbolic links point to extraction directory (Medium severity: 5.9).
+- Fixed GHSA-5rjg-fvgr-3xxf in setuptools 68.1.2: Path traversal vulnerability in PackageIndex.download leading to arbitrary file write.
+- Fixed GHSA-cx63-2mw6-8hw5 in setuptools 68.1.2: Command injection via package URL.
+- Fixed PYSEC-2025-49 in setuptools 68.1.2.
+
+### Rationale
+
+This change addresses all Python package vulnerabilities that can be safely fixed without changing the base image or risking instability. The remaining vulnerabilities (Go stdlib in Google Cloud SDK and Ubuntu system packages) cannot be fixed because:
+
+1. Go stdlib 1.25.3 vulnerabilities are in Google Cloud SDK's bundled gcloud-crc32c binary and require Google to update the Cloud SDK.
+2. All Ubuntu package vulnerabilities show "No fix available" as they are already the latest versions available in Ubuntu 24.04 repositories.
+
+The fix uses `--break-system-packages` flag which is safe in a container environment where we control the entire environment and don't need to worry about system package manager conflicts.
+
+### Security
+
+- Successfully mitigated 4 known vulnerabilities in Python packages (pip and setuptools).
+- Removed old vulnerable package files to ensure security scanners don't detect false positives.
+- Remaining vulnerabilities cannot be fixed without upstream updates or changing the base image.
+
+  - **Supply Chain Posture Impact:** This change improves the security posture by ensuring that Python packages used in the container are up-to-date with the latest security fixes. The pip vulnerability (CVE-2025-8869) could allow path traversal when extracting packages, while the setuptools vulnerabilities could enable command injection and arbitrary file write. By upgrading these packages, we reduce the attack surface for supply chain attacks that might leverage vulnerable Python package management tools. The removal of old vulnerable files ensures that security scanners accurately reflect the actual security posture without false positives from unused legacy files.
+  - **Security Posture Impact:** Positive
+
 ## [[#49](https://github.com/brabster/terraform-bootstrap-gcp/pull/49)] - Deduplicate vulnerability reports in GitHub Security tab
 
 ### Added
