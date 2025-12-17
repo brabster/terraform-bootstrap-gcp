@@ -30,8 +30,8 @@ The agent operates in GitHub Copilot environment, and is limited by strict firew
 The project uses Docker to build container images:
 
 ```bash
-# Build the image
-docker build -t candidate_image:latest .
+# Build the image (automatically handles Copilot proxy)
+scripts/build_image.sh -t candidate_image:latest .
 
 # Test the image
 cat scripts/validate_image.sh | docker run --rm -i candidate_image:latest bash
@@ -40,6 +40,8 @@ cat scripts/validate_image.sh | docker run --rm -i candidate_image:latest bash
 scripts/install_osv_scanner.sh
 scripts/run_osv_scanner.sh scan image candidate_image:latest
 ```
+
+**Note:** The `build_image.sh` script automatically detects when running in a GitHub Copilot coding agent environment (via the `COPILOT_API_URL` environment variable) and configures the intercepting proxy certificate accordingly. This prevents GPG key download failures that occur when building directly with `docker build` in restricted environments.
 
 The CI/CD pipeline (`.github/workflows/docker-publish.yml`) automatically builds, tests, scans for vulnerabilities, and publishes images daily.
 
