@@ -32,7 +32,7 @@ This image relies on the following direct dependencies. Maintainers of these dep
 | Version control        | `git`              | Canonical                  |
 | Shell completion       | `bash-completion`  | Canonical                  |
 
-**Note:** `pip` and `setuptools` are automatically upgraded to the latest versions from PyPI during each image build to ensure up-to-date security patches.
+**Note:** `pip` and `setuptools` are included in the base Ubuntu image but with outdated, vulnerable versions. This image takes control of these packages as direct dependencies and automatically upgrades them to the latest versions from PyPI during each build to ensure up-to-date security patches.
 
 ## Image tagging strategy
 
