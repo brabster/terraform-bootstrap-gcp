@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [[#49](https://github.com/brabster/terraform-bootstrap-gcp/pull/49)] - Deduplicate vulnerability reports in GitHub Security tab
+
+### Added
+
+- New script `scripts/deduplicate_sarif.sh` to post-process osv-scanner SARIF output and remove duplicate vulnerability reports.
+- SARIF validation to ensure proper structure before processing.
+- Comprehensive error handling for missing files, invalid SARIF structure, and jq processing failures.
+
+### Changed
+
+- Modified the `docker-publish.yml` workflow to deduplicate SARIF results before uploading to GitHub Code Scanning.
+- osv-scanner now outputs to `osv_scan_results_raw.sarif`, which is processed to create the deduplicated `osv_scan_results.sarif`.
+
+### Fixed
+
+- Fixed issue where duplicate vulnerabilities appeared in the GitHub Security tab even though osv-scanner includes partialFingerprints in its output.
+- Reduced duplicate vulnerability reports by approximately 50% based on testing with ubuntu:latest image.
+
+### Rationale
+
+The osv-scanner tool includes partialFingerprints in its SARIF output to help identify duplicate findings, but GitHub's Security tab was still displaying duplicates. This occurs when osv-scanner reports the same vulnerability multiple times with identical ruleId and fingerprint values, typically when a vulnerability affects multiple package layers or paths. The deduplication script uses jq to remove these duplicates based on the combination of ruleId and partialFingerprints.primaryLocationLineHash, ensuring each unique vulnerability is reported only once while preserving all other SARIF structure and metadata.
+
+### Security
+
+- Improves the signal-to-noise ratio in security scanning by eliminating duplicate vulnerability reports.
+- Makes security alerts more actionable by showing the actual number of unique vulnerabilities.
+- Does not filter out any unique vulnerabilities - only removes exact duplicates with identical ruleId and fingerprint.
+- Maintains all SARIF structure and metadata, ensuring no security information is lost during deduplication.
+
+  - **Threat Model Impact:** This change improves the effectiveness of vulnerability management by providing an accurate count of unique security issues. Duplicate reports can lead to alert fatigue and make it harder to prioritize remediation efforts. By deduplicating results, security teams can focus on addressing each unique vulnerability without confusion from repeated alerts. The deduplication logic is conservative, only removing entries that have identical ruleId and fingerprint combinations, ensuring no distinct vulnerabilities are hidden.
+  - **Security Posture Impact:** Positive
+
 ## [[#45](https://github.com/brabster/terraform-bootstrap-gcp/pull/45)] - Add attestation to published Docker images
 
 ### Added
