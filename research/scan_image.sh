@@ -16,7 +16,7 @@ docker pull "$IMAGE"
 SIZE=$(docker images --format "{{.Size}}" "$IMAGE")
 
 # Scan the image and deduplicate results
-osv-scanner scan image --format sarif --output "$SCAN_OUTPUT_RAW_FILENAME" "$IMAGE" || true
+"$(dirname "$0")/../scripts/run_osv_scanner.sh" scan image --format sarif --output "$SCAN_OUTPUT_RAW_FILENAME" "$IMAGE"
 "$(dirname "$0")/../scripts/deduplicate_sarif.sh" "$SCAN_OUTPUT_RAW_FILENAME" "$SCAN_OUTPUT_FILENAME"
 
 docker rmi "$IMAGE"
