@@ -32,6 +32,8 @@ This image relies on the following direct dependencies. Maintainers of these dep
 | Version control        | `git`              | Canonical                  |
 | Shell completion       | `bash-completion`  | Canonical                  |
 
+**Note:** `pip` and `setuptools` are automatically upgraded to the latest versions from PyPI during each image build to ensure up-to-date security patches.
+
 ## Image tagging strategy
 
 The image has two types of tags:

@@ -4,13 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - Fix Python package vulnerabilities
+## [[#55](https://github.com/brabster/terraform-bootstrap-gcp/pull/55)] - Fix Python package vulnerabilities
 
 ### Changed
 
-- Upgraded pip from 24.0 to 25.3 to fix CVE-2025-8869 (GHSA-4xh5-x5gv-qwph).
-- Upgraded setuptools from 68.1.2 to 80.9.0 to fix GHSA-5rjg-fvgr-3xxf, GHSA-cx63-2mw6-8hw5, and PYSEC-2025-49.
-- Modified `scripts/setup_python.sh` to install python3-pip, upgrade pip and setuptools using pip with --break-system-packages flag, and remove old vulnerable package files.
+- Upgraded pip and setuptools to latest versions to fix vulnerabilities. Versions are automatically upgraded on each image build to stay current with security patches.
+- Fixed pip 24.0 vulnerability CVE-2025-8869 (GHSA-4xh5-x5gv-qwph).
+- Fixed setuptools 68.1.2 vulnerabilities GHSA-5rjg-fvgr-3xxf, GHSA-cx63-2mw6-8hw5, and PYSEC-2025-49.
+- Modified `scripts/setup_python.sh` to install python3-pip, upgrade pip and setuptools to latest versions using pip with --break-system-packages flag, and remove old vulnerable package files.
+- Added pip and setuptools to README dependencies table.
 
 ### Fixed
 
