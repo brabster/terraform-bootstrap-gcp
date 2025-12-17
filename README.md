@@ -27,8 +27,12 @@ This image relies on the following direct dependencies. Maintainers of these dep
 | Infrastructure as Code | `terraform`        | HashiCorp                  |
 | Cloud SDK              | Google Cloud SDK   | Google                     |
 | Language               | `python`           | Python Software Foundation |
+| Package manager        | `pip`              | Python Software Foundation |
+| Build tools            | `setuptools`       | Python Software Foundation |
 | Version control        | `git`              | Canonical                  |
 | Shell completion       | `bash-completion`  | Canonical                  |
+
+**Note:** `pip` and `setuptools` are included in the base Ubuntu image but with outdated, vulnerable versions. This image takes control of these packages as direct dependencies and automatically upgrades them to the latest versions from PyPI during each build to ensure up-to-date security patches.
 
 ## Image tagging strategy
 
