@@ -48,8 +48,8 @@ echo "Original results count: $ORIGINAL_COUNT"
 
 # Deduplicate results using unique_by on ruleId + partialFingerprints.primaryLocationLineHash
 # This preserves all other SARIF structure and only removes duplicate vulnerability reports
-# Handle missing partialFingerprints by using empty string as fallback
-if ! jq '.runs[0].results |= unique_by(.ruleId + (.partialFingerprints.primaryLocationLineHash // ""))' \
+# Handle missing ruleId and partialFingerprints by using empty string as fallback
+if ! jq '.runs[0].results |= unique_by((.ruleId // "") + (.partialFingerprints.primaryLocationLineHash // ""))' \
   "$INPUT_FILE" > "$OUTPUT_FILE"; then
   echo "Error: Failed to deduplicate SARIF results using jq" >&2
   exit 2
