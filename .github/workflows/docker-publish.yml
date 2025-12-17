@@ -55,7 +55,8 @@ jobs:
       run: |
         scripts/install_osv_scanner.sh
         scripts/run_osv_scanner.sh scan image --archive "${{ runner.temp }}/candidate_image.tar"
-        scripts/run_osv_scanner.sh scan image --archive "${{ runner.temp }}/candidate_image.tar" --format=sarif --output=osv_scan_results.sarif
+        scripts/run_osv_scanner.sh scan image --archive "${{ runner.temp }}/candidate_image.tar" --format=sarif --output=osv_scan_results_raw.sarif
+        scripts/deduplicate_sarif.sh osv_scan_results_raw.sarif osv_scan_results.sarif
 
     - name: Upload OSV scan results
       id: upload_artifact
