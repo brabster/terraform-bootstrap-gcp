@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 #
 # Deduplicates SARIF results based on ruleId and partialFingerprints.primaryLocationLineHash.
 # This resolves duplicate vulnerabilities in the GitHub Security tab that occur when
