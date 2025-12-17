@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/env bash
 #
 # Deduplicates SARIF results based on ruleId and partialFingerprints.primaryLocationLineHash.
 # This resolves duplicate vulnerabilities in the GitHub Security tab that occur when
@@ -49,8 +49,11 @@ echo "Original results count: $ORIGINAL_COUNT"
 # Deduplicate results using unique_by on ruleId + partialFingerprints.primaryLocationLineHash
 # This preserves all other SARIF structure and only removes duplicate vulnerability reports
 # Handle missing partialFingerprints by using empty string as fallback
-jq '.runs[0].results |= unique_by(.ruleId + (.partialFingerprints.primaryLocationLineHash // ""))' \
-  "$INPUT_FILE" > "$OUTPUT_FILE"
+if ! jq '.runs[0].results |= unique_by(.ruleId + (.partialFingerprints.primaryLocationLineHash // ""))' \
+  "$INPUT_FILE" > "$OUTPUT_FILE"; then
+  echo "Error: Failed to deduplicate SARIF results using jq" >&2
+  exit 2
+fi
 
 # Validate output was created
 if [ ! -f "$OUTPUT_FILE" ]; then
@@ -60,6 +63,13 @@ fi
 
 # Count deduplicated results
 DEDUPLICATED_COUNT=$(jq '.runs[0].results | length' "$OUTPUT_FILE")
+
+# Validate deduplication resulted in same or fewer results
+if [ "$DEDUPLICATED_COUNT" -gt "$ORIGINAL_COUNT" ]; then
+  echo "Error: Deduplication resulted in more results than original ($DEDUPLICATED_COUNT > $ORIGINAL_COUNT)" >&2
+  exit 2
+fi
+
 REMOVED_COUNT=$((ORIGINAL_COUNT - DEDUPLICATED_COUNT))
 
 echo "Deduplicated results count: $DEDUPLICATED_COUNT"
