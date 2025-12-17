@@ -65,7 +65,7 @@ The CI/CD pipeline (`.github/workflows/docker-publish.yml`) automatically builds
 - Write scripts that are reliable, maintainable, and secure
 - Scripts should be idempotent, meaning they can be run multiple times with the same outcome
 - Use `set -euo pipefail` to make scripts more robust (fail fast, treat unset variables as errors, fail on pipeline errors)
-- Always start scripts with `#!/bin/env bash` to specify the interpreter
+- Always start scripts with `#!/usr/bin/env bash` to specify the interpreter
 - Use comments to explain complex logic
 - Break down code into functions to avoid repetition
 - Use clear and descriptive variable names
