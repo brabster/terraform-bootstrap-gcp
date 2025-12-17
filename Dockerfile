@@ -18,6 +18,7 @@ COPY scripts/ /tmp/scripts/
 # Install third party software, git (Canonical) and bash-completion (Canonical) for git CLI completion
 # Point gcloud tooling at installed python and delete bundled python (removed cryptography vulnerability, reduces image size)
 # Install proxy certificate if provided (for environments with intercepting proxies)
+# Remove build-only packages (gnupg, lsb-release, wget) after use to reduce attack surface
 #
 # Implementation note: We use --mount=type=secret for the certificate because:
 # - It keeps the certificate out of the build context (avoiding context pollution)
@@ -53,6 +54,8 @@ RUN --mount=type=secret,id=proxy_cert,required=false \
     && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
     && rm -rf /usr/lib/google-cloud-sdk/platform/bundledpythonunix \
     && /tmp/scripts/install_osv_scanner.sh \
+    && apt-get purge -y --auto-remove gnupg lsb-release wget \
+    && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/scripts
 
 USER ubuntu
