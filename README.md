@@ -27,6 +27,8 @@ This image relies on the following direct dependencies. Maintainers of these dep
 | Infrastructure as Code | `terraform`        | HashiCorp                  |
 | Cloud SDK              | Google Cloud SDK   | Google                     |
 | Language               | `python`           | Python Software Foundation |
+| Package manager        | `pip`              | Python Software Foundation |
+| Build tools            | `setuptools`       | Python Software Foundation |
 | Version control        | `git`              | Canonical                  |
 | Shell completion       | `bash-completion`  | Canonical                  |
 
