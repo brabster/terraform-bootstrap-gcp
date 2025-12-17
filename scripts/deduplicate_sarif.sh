@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 #
 # Deduplicates SARIF results based on ruleId and partialFingerprints.primaryLocationLineHash.
 # This resolves duplicate vulnerabilities in the GitHub Security tab that occur when
@@ -8,7 +8,7 @@
 #
 # Exit codes:
 #   0 - Success
-#   1 - Invalid arguments or file not found
+#   1 - Invalid arguments, file not found, or invalid SARIF structure
 #   2 - jq processing failed
 
 set -euo pipefail
@@ -36,13 +36,20 @@ fi
 
 echo "Deduplicating SARIF results from '$INPUT_FILE'"
 
+# Validate SARIF structure
+if ! jq -e '.runs and (.runs | length > 0) and .runs[0].results' "$INPUT_FILE" > /dev/null; then
+  echo "Error: Invalid SARIF structure - missing .runs[0].results" >&2
+  exit 1
+fi
+
 # Count original results
 ORIGINAL_COUNT=$(jq '.runs[0].results | length' "$INPUT_FILE")
 echo "Original results count: $ORIGINAL_COUNT"
 
 # Deduplicate results using unique_by on ruleId + partialFingerprints.primaryLocationLineHash
 # This preserves all other SARIF structure and only removes duplicate vulnerability reports
-jq '.runs[0].results |= unique_by(.ruleId + .partialFingerprints.primaryLocationLineHash)' \
+# Handle missing partialFingerprints by using empty string as fallback
+jq '.runs[0].results |= unique_by(.ruleId + (.partialFingerprints.primaryLocationLineHash // ""))' \
   "$INPUT_FILE" > "$OUTPUT_FILE"
 
 # Validate output was created
