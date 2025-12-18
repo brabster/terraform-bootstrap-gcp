@@ -55,7 +55,6 @@ LABEL org.opencontainers.image.licenses="MIT"
 COPY scripts/ /tmp/scripts/
 
 # Install third party software, git (Canonical) and bash-completion (Canonical) for git CLI completion
-# Copy Python virtual environment from builder stage
 # Point gcloud tooling at installed python and delete bundled python (removed cryptography vulnerability, reduces image size)
 # Install proxy certificate if provided (for environments with intercepting proxies)
 # Remove build-only packages (gnupg, lsb-release, wget) and unnecessary utilities (unminimize) after use to reduce attack surface
