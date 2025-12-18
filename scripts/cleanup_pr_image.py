@@ -6,20 +6,13 @@ This script uses the GitHub Packages API to identify and delete a specific
 image tag associated with a pull request. It is designed to clean up temporary
 PR images when the pull request is closed or merged.
 
-Required environment variables:
-    PR_NUMBER: The pull request number
-    GITHUB_REPOSITORY: The repository in format "owner/repo"
-    GITHUB_REPOSITORY_OWNER: The repository owner
-    GITHUB_TOKEN: GitHub token with packages:write permission
-    GITHUB_ACTOR: GitHub username for authentication
-
 Exit codes:
     0: Success (image deleted or not found)
     1: Error (API failure, authentication failure, validation failure, etc.)
 """
 
+import argparse
 import json
-import os
 import subprocess
 import sys
 from typing import Optional
@@ -32,42 +25,43 @@ def github_action_log(level: str, message: str) -> None:
     print(f"::{level}::{message}")
 
 
-def validate_env_vars() -> dict:
+def parse_args() -> argparse.Namespace:
     """
-    Validate required environment variables are set.
+    Parse command line arguments.
     
     Returns:
-        dict: Dictionary of validated environment variables
-        
-    Raises:
-        SystemExit: If any required variable is missing
+        Parsed arguments
     """
-    required_vars = [
-        "PR_NUMBER",
-        "GITHUB_REPOSITORY",
-        "GITHUB_REPOSITORY_OWNER",
-        "GITHUB_TOKEN",
-        "GITHUB_ACTOR",
-    ]
+    parser = argparse.ArgumentParser(
+        description="Delete PR-specific Docker images from GitHub Container Registry"
+    )
+    parser.add_argument(
+        "--pr-number",
+        required=True,
+        help="Pull request number"
+    )
+    parser.add_argument(
+        "--repository",
+        required=True,
+        help="Repository in format 'owner/repo'"
+    )
+    parser.add_argument(
+        "--owner",
+        required=True,
+        help="Repository owner"
+    )
+    parser.add_argument(
+        "--token",
+        required=True,
+        help="GitHub token with packages:write permission"
+    )
+    parser.add_argument(
+        "--actor",
+        required=True,
+        help="GitHub username for authentication"
+    )
     
-    env_vars = {}
-    missing_vars = []
-    
-    for var in required_vars:
-        value = os.environ.get(var)
-        if not value:
-            missing_vars.append(var)
-        else:
-            env_vars[var] = value
-    
-    if missing_vars:
-        github_action_log(
-            "error",
-            f"Required environment variables not set: {', '.join(missing_vars)}"
-        )
-        sys.exit(1)
-    
-    return env_vars
+    return parser.parse_args()
 
 
 def docker_login(token: str, actor: str) -> None:
@@ -202,14 +196,14 @@ def delete_package_version(
 
 def main() -> None:
     """Main entry point for the cleanup script."""
-    # Validate environment variables
-    env = validate_env_vars()
+    # Parse command line arguments
+    args = parse_args()
     
-    pr_number = env["PR_NUMBER"]
-    repository = env["GITHUB_REPOSITORY"]
-    owner = env["GITHUB_REPOSITORY_OWNER"]
-    token = env["GITHUB_TOKEN"]
-    actor = env["GITHUB_ACTOR"]
+    pr_number = args.pr_number
+    repository = args.repository
+    owner = args.owner
+    token = args.token
+    actor = args.actor
     
     # Extract package name from repository
     package_name = repository.split("/")[-1].lower()

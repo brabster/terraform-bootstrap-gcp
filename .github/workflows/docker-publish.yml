@@ -146,8 +146,6 @@ jobs:
       # This permission allows the workflow to write attestation data associated with the published artifacts
       # Reference: https://github.com/actions/attest-build-provenance#permissions
       attestations: write
-      # pull-requests: write is required to comment on PRs with the published image tag
-      pull-requests: write
     needs:
       - build_and_load
       - osv_scan
@@ -170,45 +168,13 @@ jobs:
     # On pull request: push with 'pr-<number>' tag for testing without affecting production tags
     - name: Push tagged image
       id: push
-      env:
-        DOCKER_SHA_TAG: ghcr.io/${{ github.repository }}:${{ github.sha }}
-        DOCKER_LATEST_TAG: ghcr.io/${{ github.repository }}:latest
-        DOCKER_PR_TAG: ghcr.io/${{ github.repository }}:pr-${{ github.event.pull_request.number }}
       run: |
-        set -euo pipefail
-        docker load -i ${{ runner.temp }}/candidate_image.tar
-        
-        # Function to extract and validate digest from docker push output
-        extract_digest() {
-          local push_output="$1"
-          local digest
-          digest=$(echo "$push_output" | grep -oP 'digest: \K(sha256:[a-f0-9]{64})')
-          if [ -z "$digest" ]; then
-            echo "::error::Failed to extract digest from docker push output"
-            echo "Push output was: $push_output"
-            exit 1
-          fi
-          echo "$digest"
-        }
-        
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          # On PR: push only with PR-specific tag
-          docker tag candidate_image:latest $DOCKER_PR_TAG
-          PUSH_OUTPUT=$(docker push $DOCKER_PR_TAG)
-          DIGEST=$(extract_digest "$PUSH_OUTPUT")
-          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
-          echo "tag=$DOCKER_PR_TAG" >> $GITHUB_OUTPUT
-        else
-          # On main: push with both SHA and latest tags
-          docker tag candidate_image:latest $DOCKER_SHA_TAG
-          PUSH_OUTPUT=$(docker push $DOCKER_SHA_TAG)
-          DIGEST=$(extract_digest "$PUSH_OUTPUT")
-          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
-          # Push the latest tag (same image, so same digest)
-          docker tag candidate_image:latest $DOCKER_LATEST_TAG
-          docker push $DOCKER_LATEST_TAG
-          echo "tag=$DOCKER_LATEST_TAG" >> $GITHUB_OUTPUT
-        fi
+        python3 scripts/push_image.py \
+          --event-name "${{ github.event_name }}" \
+          --repository "${{ github.repository }}" \
+          --sha "${{ github.sha }}" \
+          ${{ github.event_name == 'pull_request' && format('--pr-number "{0}"', github.event.pull_request.number) || '' }} \
+          --image-tar "${{ runner.temp }}/candidate_image.tar" >> $GITHUB_OUTPUT
 
     # Generate build provenance attestations for the published Docker images
     # This creates cryptographically signed attestations that prove:
@@ -233,40 +199,4 @@ jobs:
         subject-name: ghcr.io/${{ github.repository }}
         subject-digest: ${{ steps.push.outputs.digest }}
         push-to-registry: true
-
-    # Comment on PR with the published image tag for easy testing
-    - name: Comment on PR with image tag
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v7 # maintained by GitHub
-      with:
-        script: |
-          const tag = process.env.IMAGE_TAG;
-          const comment = `## 🐳 PR Image Published
-          
-          The Docker image for this PR has been built, tested, and published.
-          
-          **Image tag:** \`${tag}\`
-          
-          You can test this image with:
-          \`\`\`bash
-          docker pull ${tag}
-          docker run -it --rm ${tag}
-          \`\`\`
-          
-          Or use it in your workflows:
-          \`\`\`yaml
-          container:
-            image: ${tag}
-          \`\`\`
-          
-          ✅ All tests passed (build, vulnerability scan, image validation)`;
-          
-          github.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            body: comment
-          });
-      env:
-        IMAGE_TAG: ${{ steps.push.outputs.tag }}
 
