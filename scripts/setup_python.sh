@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # Create Python virtual environment with latest pip and setuptools
 # This isolates Python packages from the system installation
