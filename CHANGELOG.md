@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [[#64](https://github.com/brabster/terraform-bootstrap-gcp/pull/64)] - Document ca-certificates package in Dockerfile
+
+### Changed
+
+- Updated Dockerfile comment to explicitly document ca-certificates package alongside git and bash-completion, clarifying its purpose for HTTPS certificate validation.
+
+### Rationale
+
+The ca-certificates package (Canonical) is a critical dependency that provides the system certificate trust store required for HTTPS operations throughout the build process. While it was added in PR #63, the inline documentation did not reflect this addition. This change updates the comment to maintain consistency with the established pattern of documenting all third-party packages and their maintaining parties.
+
+### Security
+
+- No functional changes to the image. This is a documentation-only update to improve transparency about dependencies.
+
+  - **Supply Chain Posture Impact:** Improving documentation of dependencies enhances supply chain transparency and helps users understand the trust relationships in the image. Clear documentation of ca-certificates as a Canonical package makes it explicit that HTTPS certificate validation relies on Ubuntu's certificate trust store, which is maintained by Canonical. This transparency is important for security audits and understanding the image's trust model.
+  - **Security Posture Impact:** Neutral
+
+## [[#63](https://github.com/brabster/terraform-bootstrap-gcp/pull/63)] - Add ca-certificates package for Terraform installation
+
+### Added
+
+- Added ca-certificates package to Dockerfile apt-get install command to provide system certificate trust store for HTTPS operations.
+
+### Rationale
+
+The ca-certificates package is required for HTTPS certificate validation during the Terraform installation process. Without this package, the apt_install_thirdparty.sh script fails when attempting to download GPG keys and configure third-party apt repositories over HTTPS. This package provides the system-wide certificate trust store that enables secure HTTPS connections for package downloads and repository configuration.
+
+The ca-certificates package is maintained by Canonical and is a standard component of Ubuntu systems. It contains the Mozilla CA certificate bundle that is used by various tools and libraries for validating HTTPS connections.
+
+### Security
+
+- Fixed build failures when installing Terraform due to missing HTTPS certificate validation capabilities.
+- Added explicit dependency on Canonical's certificate trust store for HTTPS operations.
+
+  - **Supply Chain Posture Impact:** This change makes an implicit dependency explicit. The Terraform installation process already required HTTPS certificate validation but was failing without ca-certificates. By explicitly installing this package, we ensure that certificate validation works correctly and document our reliance on Canonical's Mozilla CA certificate bundle for trust decisions. This improves supply chain transparency by making it clear that all HTTPS operations in the build process trust the CA certificates provided by Canonical/Ubuntu. The package is maintained by Canonical and receives regular updates through the Ubuntu security update process.
+  - **Security Posture Impact:** Positive
+
 ## [TBD] - Refactor Dockerfile to multi-stage build to remediate OS-level vulnerabilities
 
 ### Changed
