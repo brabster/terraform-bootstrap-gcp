@@ -54,7 +54,7 @@ LABEL org.opencontainers.image.licenses="MIT"
 
 COPY scripts/ /tmp/scripts/
 
-# Install third party software, git (Canonical) and bash-completion (Canonical) for git CLI completion
+# Install third party software, git (Canonical), bash-completion (Canonical), and ca-certificates (Canonical) for HTTPS certificate validation
 # Install proxy certificate if provided (for environments with intercepting proxies)
 # Delete bundled python from gcloud (removed cryptography vulnerability, reduces image size)
 # Remove build-only packages (gnupg, lsb-release, wget) and unnecessary utilities (unminimize) after use to reduce attack surface
