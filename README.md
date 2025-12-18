@@ -7,7 +7,7 @@
 
 This repository provides a Docker container image for cloud and data engineering. It includes essential tools for working with Google Cloud Platform, Terraform, and Python.
 
-The image is built and published to the GitHub Container Registry every day. This process ensures it has the latest software versions and security updates.
+The image is built, tested, and published to the GitHub Container Registry daily, on every push to the main branch, and on every pull request. This process ensures it has the latest software versions and security updates. Pull requests receive a temporary tag for testing before merge.
 
 It is designed for temporary development environments, including:
 - **GitHub Codespaces**: For a pre-built cloud development environment.
@@ -36,10 +36,11 @@ This image relies on the following direct dependencies. Maintainers of these dep
 
 ## Image tagging strategy
 
-The image has two types of tags:
+The image has three types of tags:
 
-- **`latest`**: This tag always points to the most recent daily build.
-- **git SHA**: A tag with the git SHA of the commit that triggered the build is created for each build. This allows for pinning to a specific version of the image should the need arise.
+- **`latest`**: This tag always points to the most recent build from the main branch. Updated on every push to main and on the daily schedule.
+- **git SHA**: A tag with the git SHA of the commit that triggered the build is created for each build from the main branch. This allows for pinning to a specific version of the image should the need arise.
+- **`pr-<number>`**: A temporary tag created for each pull request (e.g., `pr-42`). These tags allow testing PR changes before merge but do not affect production tags.
 
 ## Supply chain security
 
