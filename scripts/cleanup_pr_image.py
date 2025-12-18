@@ -82,7 +82,7 @@ def docker_login(token: str, actor: str) -> None:
         SystemExit: If authentication fails
     """
     try:
-        process = subprocess.run(
+        subprocess.run(
             ["docker", "login", "ghcr.io", "-u", actor, "--password-stdin"],
             input=token.encode(),
             capture_output=True,
