@@ -91,7 +91,8 @@ def load_image(tar_path: str) -> None:
         )
         print(f"Successfully loaded image from {tar_path}")
     except subprocess.CalledProcessError as e:
-        github_action_log("error", f"Failed to load image: {e.stderr.decode()}")
+        error_msg = e.stderr.decode() if e.stderr else str(e)
+        github_action_log("error", f"Failed to load image: {error_msg}")
         sys.exit(1)
     except subprocess.TimeoutExpired:
         github_action_log("error", "Image load timed out")
@@ -118,7 +119,8 @@ def docker_tag(source: str, target: str) -> None:
         )
         print(f"Tagged {source} as {target}")
     except subprocess.CalledProcessError as e:
-        github_action_log("error", f"Failed to tag image: {e.stderr.decode()}")
+        error_msg = e.stderr.decode() if e.stderr else str(e)
+        github_action_log("error", f"Failed to tag image: {error_msg}")
         sys.exit(1)
     except subprocess.TimeoutExpired:
         github_action_log("error", "Image tagging timed out")
