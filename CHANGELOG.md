@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [TBD] - Refactor Dockerfile to multi-stage build to remediate OS-level vulnerabilities
+
+### Changed
+
+- Refactored Dockerfile to use multi-stage build pattern with separate `builder` and final stages.
+- Modified `setup_python.sh` to create a Python virtual environment in `/opt/python-venv` instead of installing pip and setuptools system-wide.
+- Python packages (pip, setuptools) are now installed in a virtual environment in the builder stage and copied to the final image.
+
+### Removed
+
+- Removed build-essential, binutils, python3-venv, and python3-pip from the final image by isolating them in the builder stage.
+- Removed vulnerable media library dependencies (libpng1.6, libde265, libjpeg-turbo) that were previously pulled in as transitive dependencies of build tools.
+- Removed python-pip package vulnerabilities by using virtual environment instead of system-wide installation.
+
+### Rationale
+
+The previous single-stage build included build tools (build-essential, binutils, patch) and their transitive dependencies (media libraries like libpng, libjpeg) in the final image. These were only needed to compile and install the latest pip and setuptools from PyPI but served no purpose at runtime. A multi-stage build isolates these dependencies in a temporary builder stage, then copies only the compiled artifacts (Python virtual environment) to the final image.
+
+The builder stage installs:
+1. **python3-venv**: Creates isolated Python environments
+2. **build-essential**: Provides compilers and build tools needed for pip package compilation
+
+The final stage receives only the Python virtual environment containing the upgraded pip and setuptools, without any build tools or their dependencies.
+
+### Security
+
+- Reduced known vulnerabilities from 42 to 26 (38% reduction).
+- Reduced vulnerable packages from 22 to 17 (23% reduction).
+- Removed 5 vulnerable packages: binutils (7 vulnerabilities), python-pip (5 vulnerabilities), libde265 (2 vulnerabilities), libpng1.6 (1 vulnerability), libjpeg-turbo (1 vulnerability).
+- Removed 16 total vulnerabilities (4 High, 7 Medium, 5 Low).
+
+  - **Supply Chain Posture Impact:** This change significantly reduces the image's attack surface by eliminating build tools and their transitive dependencies from the runtime environment. Build tools like binutils, gcc, and patch could be exploited by an attacker who gains access to the running container to compile malicious code or exploit vulnerabilities in these tools. Media libraries like libpng and libjpeg, pulled in as transitive dependencies, introduced additional vulnerabilities despite never being used. The multi-stage build ensures only runtime dependencies are present in the final image, following the principle of least privilege and defense in depth. The Python virtual environment approach also provides better isolation and version control for Python packages.
+  - **Security Posture Impact:** Positive
+
 ## [[#57](https://github.com/brabster/terraform-bootstrap-gcp/pull/57)] - Remove build-time packages to reduce attack surface
 
 ### Removed
