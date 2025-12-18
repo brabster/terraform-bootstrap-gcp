@@ -153,6 +153,8 @@ jobs:
       - test_osv_scanner_wrapper
     steps:
 
+    - uses: actions/checkout@v3 # maintained by GitHub
+
     - name: Download image artifact
       uses: actions/download-artifact@v4 # maintained by GitHub
       with:
