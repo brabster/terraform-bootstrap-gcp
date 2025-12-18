@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - Test build process on PR instead of when merged
+## [[#62](https://github.com/brabster/terraform-bootstrap-gcp/pull/62)] - Test build process on PR instead of when merged
 
 ### Added
 

@@ -178,28 +178,31 @@ jobs:
         set -euo pipefail
         docker load -i ${{ runner.temp }}/candidate_image.tar
         
+        # Function to extract and validate digest from docker push output
+        extract_digest() {
+          local push_output="$1"
+          local digest
+          digest=$(echo "$push_output" | grep -oP 'digest: \K(sha256:[a-f0-9]{64})')
+          if [ -z "$digest" ]; then
+            echo "::error::Failed to extract digest from docker push output"
+            echo "Push output was: $push_output"
+            exit 1
+          fi
+          echo "$digest"
+        }
+        
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           # On PR: push only with PR-specific tag
           docker tag candidate_image:latest $DOCKER_PR_TAG
           PUSH_OUTPUT=$(docker push $DOCKER_PR_TAG)
-          DIGEST=$(echo "$PUSH_OUTPUT" | grep -oP 'digest: \K(sha256:[a-f0-9]{64})')
-          if [ -z "$DIGEST" ]; then
-            echo "::error::Failed to extract digest from docker push output"
-            echo "Push output was: $PUSH_OUTPUT"
-            exit 1
-          fi
+          DIGEST=$(extract_digest "$PUSH_OUTPUT")
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           echo "tag=$DOCKER_PR_TAG" >> $GITHUB_OUTPUT
         else
           # On main: push with both SHA and latest tags
           docker tag candidate_image:latest $DOCKER_SHA_TAG
           PUSH_OUTPUT=$(docker push $DOCKER_SHA_TAG)
-          DIGEST=$(echo "$PUSH_OUTPUT" | grep -oP 'digest: \K(sha256:[a-f0-9]{64})')
-          if [ -z "$DIGEST" ]; then
-            echo "::error::Failed to extract digest from docker push output"
-            echo "Push output was: $PUSH_OUTPUT"
-            exit 1
-          fi
+          DIGEST=$(extract_digest "$PUSH_OUTPUT")
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
           # Push the latest tag (same image, so same digest)
           docker tag candidate_image:latest $DOCKER_LATEST_TAG
