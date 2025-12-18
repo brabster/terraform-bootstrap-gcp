@@ -55,8 +55,8 @@ LABEL org.opencontainers.image.licenses="MIT"
 COPY scripts/ /tmp/scripts/
 
 # Install third party software, git (Canonical) and bash-completion (Canonical) for git CLI completion
-# Point gcloud tooling at installed python and delete bundled python (removed cryptography vulnerability, reduces image size)
 # Install proxy certificate if provided (for environments with intercepting proxies)
+# Delete bundled python from gcloud (removed cryptography vulnerability, reduces image size)
 # Remove build-only packages (gnupg, lsb-release, wget) and unnecessary utilities (unminimize) after use to reduce attack surface
 RUN --mount=type=secret,id=proxy_cert,required=false \
     chmod +x /tmp/scripts/* \
@@ -77,6 +77,7 @@ RUN --mount=type=secret,id=proxy_cert,required=false \
 COPY --from=builder /opt/python-venv /opt/python-venv
 
 # Create global python alias and configure environment to use venv
+# Point gcloud tooling at venv python (instead of bundled python that was deleted above)
 ENV PATH="/opt/python-venv/bin:$PATH"
 ENV CLOUDSDK_PYTHON=/opt/python-venv/bin/python
 RUN ln -s /opt/python-venv/bin/python3 /usr/bin/python
