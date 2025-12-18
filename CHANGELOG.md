@@ -32,6 +32,24 @@ This change allows maintainers to test PR builds in the same environment consume
 
   - **Threat Model Impact:** This change does not affect the runtime threat model of the container images themselves. Both PR and main branch images are built from the same Dockerfile and undergo identical vulnerability scanning. The change affects the CI/CD pipeline by enabling earlier detection of security issues in pull requests before they reach the main branch. This follows the principle of shift-left security: identifying and fixing vulnerabilities as early as possible in the development lifecycle. PR images are clearly labeled with temporary tags (`pr-<number>`) that distinguish them from production tags (`latest` and SHA), preventing accidental use of test images in production environments.
   - 
+## [[#63](https://github.com/brabster/terraform-bootstrap-gcp/pull/63)] - Add ca-certificates package for Terraform installation
+
+### Added
+
+- Added ca-certificates package (Canonical) to Dockerfile apt-get install command and documented it in inline comments.
+
+### Rationale
+
+The ca-certificates package is required for HTTPS certificate validation during the Terraform installation process. Without it, the apt_install_thirdparty.sh script fails when downloading GPG keys and configuring third-party apt repositories over HTTPS. This package provides the system-wide certificate trust store containing Mozilla's CA certificate bundle.
+
+### Security
+
+- Fixed build failures when installing Terraform due to missing HTTPS certificate validation capabilities.
+- Added explicit dependency on Canonical's certificate trust store for HTTPS operations.
+
+  - **Supply Chain Posture Impact:** Makes an implicit dependency explicit, improving transparency. The Terraform installation required HTTPS certificate validation but was failing without ca-certificates. By explicitly installing and documenting this package, we clarify our reliance on Canonical's Mozilla CA certificate bundle for trust decisions in all HTTPS operations during the build process. The package receives regular security updates through Ubuntu.
+  - **Security Posture Impact:** Positive
+
 ## [[#61](https://github.com/brabster/terraform-bootstrap-gcp/pull/61)] - Refactor Dockerfile to multi-stage build to remediate OS-level vulnerabilities
 
 ### Changed
