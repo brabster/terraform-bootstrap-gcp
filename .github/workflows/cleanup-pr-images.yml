@@ -10,59 +10,13 @@ jobs:
     permissions:
       packages: write
     steps:
+      - uses: actions/checkout@v3 # maintained by GitHub
+
       - name: Delete PR image
-        run: |
-          set -euo pipefail
-          
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          IMAGE_NAME="ghcr.io/${{ github.repository }}"
-          TAG="pr-${PR_NUMBER}"
-          
-          echo "Attempting to delete image tag: ${IMAGE_NAME}:${TAG}"
-          
-          # Authenticate to GitHub Container Registry
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          
-          # Get the package version ID for the PR tag using GitHub API
-          # Extract package name from repository (format: owner/repo -> repo)
-          REPO_NAME="${{ github.repository }}"
-          PACKAGE_NAME=$(echo "${REPO_NAME#*/}" | tr '[:upper:]' '[:lower:]')
-          
-          echo "Looking for package: ${PACKAGE_NAME} with tag: ${TAG}"
-          
-          # List all versions and find the one with our PR tag
-          HTTP_STATUS=$(curl -L -w "%{http_code}" -o /tmp/versions.json \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions")
-          
-          if [ "$HTTP_STATUS" -ne 200 ]; then
-            echo "::warning::Failed to fetch package versions (HTTP ${HTTP_STATUS}). The PR image may not exist or may have already been deleted."
-            exit 0
-          fi
-          
-          # Extract version ID for the PR tag
-          VERSION_ID=$(jq -r --arg tag "$TAG" '.[] | select(.metadata.container.tags[]? == $tag) | .id' /tmp/versions.json)
-          
-          if [ -n "$VERSION_ID" ] && [ "$VERSION_ID" != "null" ]; then
-            echo "Found version ID: ${VERSION_ID} for tag ${TAG}"
-            
-            # Delete the package version
-            DELETE_STATUS=$(curl -L -w "%{http_code}" -o /tmp/delete_response.txt \
-              -X DELETE \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions/${VERSION_ID}")
-            
-            if [ "$DELETE_STATUS" -eq 204 ]; then
-              echo "Successfully deleted image tag: ${TAG}"
-            else
-              echo "::error::Failed to delete image tag ${TAG} (HTTP ${DELETE_STATUS})"
-              cat /tmp/delete_response.txt
-              exit 1
-            fi
-          else
-            echo "No image found with tag: ${TAG} (this is expected if the PR was closed before the image was published)"
-          fi
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: python3 scripts/cleanup_pr_image.py
