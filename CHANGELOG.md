@@ -22,7 +22,7 @@ The ca-certificates package is required for HTTPS certificate validation during 
   - **Supply Chain Posture Impact:** Makes an implicit dependency explicit, improving transparency. The Terraform installation required HTTPS certificate validation but was failing without ca-certificates. By explicitly installing and documenting this package, we clarify our reliance on Canonical's Mozilla CA certificate bundle for trust decisions in all HTTPS operations during the build process. The package receives regular security updates through Ubuntu.
   - **Security Posture Impact:** Positive
 
-## [TBD] - Refactor Dockerfile to multi-stage build to remediate OS-level vulnerabilities
+## [[#61](https://github.com/brabster/terraform-bootstrap-gcp/pull/61)] - Refactor Dockerfile to multi-stage build to remediate OS-level vulnerabilities
 
 ### Changed
 
