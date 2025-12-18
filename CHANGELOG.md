@@ -4,7 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [TBD] - Refactor Dockerfile to multi-stage build to remediate OS-level vulnerabilities
+## [[#63](https://github.com/brabster/terraform-bootstrap-gcp/pull/63)] - Add ca-certificates package for Terraform installation
+
+### Added
+
+- Added ca-certificates package (Canonical) to Dockerfile apt-get install command and documented it in inline comments.
+
+### Rationale
+
+The ca-certificates package is required for HTTPS certificate validation during the Terraform installation process. Without it, the apt_install_thirdparty.sh script fails when downloading GPG keys and configuring third-party apt repositories over HTTPS. This package provides the system-wide certificate trust store containing Mozilla's CA certificate bundle.
+
+### Security
+
+- Fixed build failures when installing Terraform due to missing HTTPS certificate validation capabilities.
+- Added explicit dependency on Canonical's certificate trust store for HTTPS operations.
+
+  - **Supply Chain Posture Impact:** Makes an implicit dependency explicit, improving transparency. The Terraform installation required HTTPS certificate validation but was failing without ca-certificates. By explicitly installing and documenting this package, we clarify our reliance on Canonical's Mozilla CA certificate bundle for trust decisions in all HTTPS operations during the build process. The package receives regular security updates through Ubuntu.
+  - **Security Posture Impact:** Positive
+
+## [[#61](https://github.com/brabster/terraform-bootstrap-gcp/pull/61)] - Refactor Dockerfile to multi-stage build to remediate OS-level vulnerabilities
 
 ### Changed
 

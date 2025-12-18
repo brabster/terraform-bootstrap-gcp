@@ -54,7 +54,7 @@ LABEL org.opencontainers.image.licenses="MIT"
 
 COPY scripts/ /tmp/scripts/
 
-# Install third party software, git (Canonical) and bash-completion (Canonical) for git CLI completion
+# Install third party software, git (Canonical), bash-completion (Canonical), and ca-certificates (Canonical) for HTTPS certificate validation
 # Install proxy certificate if provided (for environments with intercepting proxies)
 # Delete bundled python from gcloud (removed cryptography vulnerability, reduces image size)
 # Remove build-only packages (gnupg, lsb-release, wget) and unnecessary utilities (unminimize) after use to reduce attack surface
@@ -63,7 +63,7 @@ RUN --mount=type=secret,id=proxy_cert,required=false \
     && /tmp/scripts/install_proxy_cert.sh "$([ -f /run/secrets/proxy_cert ] && echo /run/secrets/proxy_cert || echo '')" \
     && apt-get update \
     && apt-get -y upgrade \
-    && apt-get install -y --no-install-recommends gnupg lsb-release wget bash-completion git python3 \
+    && apt-get install -y --no-install-recommends gnupg lsb-release wget bash-completion git python3 ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
     && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
