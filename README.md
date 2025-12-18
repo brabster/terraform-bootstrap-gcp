@@ -40,7 +40,7 @@ The image has three types of tags:
 
 - **`latest`**: This tag always points to the most recent build from the main branch. Updated on every push to main and on the daily schedule.
 - **git SHA**: A tag with the git SHA of the commit that triggered the build is created for each build from the main branch. This allows for pinning to a specific version of the image should the need arise.
-- **`pr-<number>`**: A temporary tag created for each pull request (e.g., `pr-42`). These tags allow testing PR changes before merge but do not affect production tags.
+- **`pr-<number>`**: A temporary tag created for each pull request (e.g., `pr-42`). These tags allow testing PR changes before merge but do not affect production tags. PR images are automatically deleted when the pull request is closed or merged.
 
 ## Supply chain security
 
