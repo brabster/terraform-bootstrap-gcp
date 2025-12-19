@@ -9,7 +9,7 @@ import re
 import sys
 import unittest
 from io import StringIO
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Add parent directory to path to import the module
 sys.path.insert(0, '/home/runner/work/terraform-bootstrap-gcp/terraform-bootstrap-gcp/scripts')
