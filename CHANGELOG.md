@@ -32,7 +32,6 @@ This change allows maintainers to test PR builds in the same environment consume
 - PR images are published to the same container registry with temporary tags, allowing security verification before merge.
 
   - **Threat Model Impact:** This change does not affect the runtime threat model of the container images themselves. Both PR and main branch images are built from the same Dockerfile and undergo identical vulnerability scanning. The change affects the CI/CD pipeline by enabling earlier detection of security issues in pull requests before they reach the main branch. This follows the principle of shift-left security: identifying and fixing vulnerabilities as early as possible in the development lifecycle. PR images are clearly labeled with temporary tags (`pr-<number>`) that distinguish them from production tags (`latest` and SHA), preventing accidental use of test images in production environments.
-  - 
 ## [[#63](https://github.com/brabster/terraform-bootstrap-gcp/pull/63)] - Add ca-certificates package for Terraform installation
 
 ### Added
