@@ -66,30 +66,20 @@ def parse_args() -> argparse.Namespace:
 
 def docker_login(token: str, actor: str) -> None:
     """
-    Authenticate to GitHub Container Registry using Docker.
-    
+    No-op placeholder for legacy Docker authentication.
+
+    This script authenticates to GitHub Container Registry using the GitHub
+    Packages API with a bearer token, so a Docker login is not required.
+    The function is retained for compatibility with existing callers.
+
     Args:
-        token: GitHub token
-        actor: GitHub actor (username)
-        
-    Raises:
-        SystemExit: If authentication fails
+        token: GitHub token (unused)
+        actor: GitHub actor (username, unused)
     """
-    try:
-        subprocess.run(
-            ["docker", "login", "ghcr.io", "-u", actor, "--password-stdin"],
-            input=token.encode(),
-            capture_output=True,
-            check=True,
-            timeout=30
-        )
-        print("Successfully authenticated to GitHub Container Registry")
-    except subprocess.CalledProcessError as e:
-        github_action_log("error", f"Docker login failed: {e.stderr.decode()}")
-        sys.exit(1)
-    except subprocess.TimeoutExpired:
-        github_action_log("error", "Docker login timed out")
-        sys.exit(1)
+    github_action_log(
+        "notice",
+        "Skipping Docker login; GitHub Packages API bearer token authentication is used instead."
+    )
 
 
 def get_package_versions(
