@@ -190,7 +190,6 @@ class TestMainFunctionTagging(unittest.TestCase):
     @patch('push_image.set_github_output')
     def test_main_event_uses_sha_and_latest_tags(self, mock_output, mock_load, mock_tag, mock_push):
         """Test that main branch push uses SHA and latest tags."""
-        from unittest.mock import MagicMock
         mock_push.return_value = "sha256:def456"
         
         test_args = [
