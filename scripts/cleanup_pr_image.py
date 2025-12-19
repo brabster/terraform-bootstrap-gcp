@@ -18,10 +18,7 @@ from typing import Optional
 from urllib import request
 from urllib.error import HTTPError, URLError
 
-
-def github_action_log(level: str, message: str) -> None:
-    """Output GitHub Actions workflow command."""
-    print(f"::{level}::{message}")
+from github_actions_utils import github_action_log, log_info
 
 
 def parse_args() -> argparse.Namespace:

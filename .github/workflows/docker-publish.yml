@@ -28,7 +28,10 @@ jobs:
     - uses: actions/checkout@v3 # maintained by GitHub
 
     - name: Run Python script unit tests
-      run: python3 scripts/test_push_image.py
+      run: |
+        python3 scripts/test_github_actions_utils.py
+        python3 scripts/test_push_image.py
+        python3 scripts/test_cleanup_pr_image.py
 
   build_and_load:
     runs-on: ubuntu-latest # maintained by GitHub

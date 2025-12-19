@@ -15,20 +15,7 @@ import re
 import subprocess
 import sys
 
-
-def github_action_log(level: str, message: str) -> None:
-    """Output GitHub Actions workflow command to stderr."""
-    print(f"::{level}::{message}", file=sys.stderr)
-
-
-def log_info(message: str) -> None:
-    """Log informational message to stderr (won't interfere with GitHub outputs)."""
-    print(message, file=sys.stderr)
-
-
-def set_github_output(name: str, value: str) -> None:
-    """Set GitHub Actions output variable to stdout."""
-    print(f"{name}={value}")
+from github_actions_utils import github_action_log, log_info, set_github_output
 
 
 def parse_args() -> argparse.Namespace:
