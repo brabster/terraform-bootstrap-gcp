@@ -17,12 +17,17 @@ import sys
 
 
 def github_action_log(level: str, message: str) -> None:
-    """Output GitHub Actions workflow command."""
-    print(f"::{level}::{message}")
+    """Output GitHub Actions workflow command to stderr."""
+    print(f"::{level}::{message}", file=sys.stderr)
+
+
+def log_info(message: str) -> None:
+    """Log informational message to stderr (won't interfere with GitHub outputs)."""
+    print(message, file=sys.stderr)
 
 
 def set_github_output(name: str, value: str) -> None:
-    """Set GitHub Actions output variable."""
+    """Set GitHub Actions output variable to stdout."""
     print(f"{name}={value}")
 
 
@@ -89,7 +94,7 @@ def load_image(tar_path: str) -> None:
             capture_output=True,
             timeout=300
         )
-        print(f"Successfully loaded image from {tar_path}")
+        log_info(f"Successfully loaded image from {tar_path}")
     except subprocess.CalledProcessError as e:
         error_msg = e.stderr.decode() if e.stderr else str(e)
         github_action_log("error", f"Failed to load image: {error_msg}")
@@ -117,7 +122,7 @@ def docker_tag(source: str, target: str) -> None:
             capture_output=True,
             timeout=30
         )
-        print(f"Tagged {source} as {target}")
+        log_info(f"Tagged {source} as {target}")
     except subprocess.CalledProcessError as e:
         error_msg = e.stderr.decode() if e.stderr else str(e)
         github_action_log("error", f"Failed to tag image: {error_msg}")
@@ -149,7 +154,7 @@ def docker_push(image: str) -> str:
             text=True
         )
         output = result.stdout + result.stderr
-        print(f"Successfully pushed {image}")
+        log_info(f"Successfully pushed {image}")
         
         # Extract digest from output (format: "digest: sha256:... size: ...")
         match = re.search(r'digest:\s+(sha256:[a-f0-9]{64})', output)
@@ -159,7 +164,7 @@ def docker_push(image: str) -> str:
             sys.exit(1)
         
         digest = match.group(1)
-        print(f"Extracted digest: {digest}")
+        log_info(f"Extracted digest: {digest}")
         return digest
         
     except subprocess.CalledProcessError as e:
