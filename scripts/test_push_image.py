@@ -191,7 +191,7 @@ class TestArgumentParsing(unittest.TestCase):
         with patch('sys.argv', test_args):
             with self.assertRaises(SystemExit) as cm:
                 push_image.parse_args()
-            self.assertEqual(cm.exception.code, 1)
+            self.assertEqual(cm.exception.code, 2)  # argparse exits with code 2
 
 
 
@@ -201,7 +201,7 @@ class TestMainFunctionTagging(unittest.TestCase):
     @patch('push_image.docker_push')
     @patch('push_image.docker_tag')
     @patch('push_image.load_image')
-    @patch('push_image.set_github_output')
+    @patch('github_actions_utils.set_github_output')
     def test_pr_event_uses_pr_tag(self, mock_output, mock_load, mock_tag, mock_push):
         """Test that PR events use pr-<number> tag."""
         mock_push.return_value = "sha256:abc123"
@@ -230,7 +230,7 @@ class TestMainFunctionTagging(unittest.TestCase):
     @patch('push_image.docker_push')
     @patch('push_image.docker_tag')
     @patch('push_image.load_image')
-    @patch('push_image.set_github_output')
+    @patch('github_actions_utils.set_github_output')
     def test_main_event_uses_sha_and_latest_tags(self, mock_output, mock_load, mock_tag, mock_push):
         """Test that main branch push uses SHA and latest tags."""
         mock_push.return_value = "sha256:def456"

@@ -14,11 +14,11 @@ Exit codes:
 import argparse
 import json
 import sys
-from typing import Optional
-from urllib import request
+from typing import Optional, Any, Dict, List
+from urllib import request as urllib_request
 from urllib.error import HTTPError, URLError
 
-from github_actions_utils import github_action_log, log_info
+import github_actions_utils
 
 
 def parse_args() -> argparse.Namespace:
@@ -57,7 +57,7 @@ def parse_args() -> argparse.Namespace:
 
 def get_package_versions(
     owner: str, package_name: str, token: str
-) -> Optional[list]:
+) -> Optional[List[Dict[str, Any]]]:
     """
     Fetch all versions of a package from GitHub Container Registry.
     
@@ -71,33 +71,34 @@ def get_package_versions(
     """
     url = f"https://api.github.com/users/{owner}/packages/container/{package_name}/versions"
     
-    req = request.Request(url)
-    req.add_header("Accept", "application/vnd.github+json")
-    req.add_header("Authorization", f"Bearer {token}")
-    req.add_header("X-GitHub-Api-Version", "2022-11-28")
+    req = urllib_request.Request(url)
+    github_actions_utils.add_github_api_headers(req, token)
     
     try:
-        with request.urlopen(req, timeout=30) as response:
-            return json.loads(response.read().decode())
+        with urllib_request.urlopen(req, timeout=30) as response:
+            data = response.read().decode()
+            from typing import cast
+            result = json.loads(data)
+            return cast(List[Dict[str, Any]], result)
     except HTTPError as e:
         if e.code == 404:
-            github_action_log(
+            github_actions_utils.github_action_log(
                 "warning",
                 f"Package not found (HTTP {e.code}). The PR image may not exist."
             )
             return None
-        github_action_log(
+        github_actions_utils.github_action_log(
             "warning",
             f"Failed to fetch package versions (HTTP {e.code}). "
             "The PR image may not exist or may have already been deleted."
         )
         return None
     except URLError as e:
-        github_action_log("error", f"Network error fetching package versions: {e}")
+        github_actions_utils.github_action_log("error", f"Network error fetching package versions: {e}")
         return None
 
 
-def find_version_id_by_tag(versions: list, tag: str) -> Optional[int]:
+def find_version_id_by_tag(versions: List[Dict[str, Any]], tag: str) -> Optional[int]:
     """
     Find the version ID for a specific tag.
     
@@ -111,7 +112,9 @@ def find_version_id_by_tag(versions: list, tag: str) -> Optional[int]:
     for version in versions:
         tags = version.get("metadata", {}).get("container", {}).get("tags", [])
         if tag in tags:
-            return version.get("id")
+            vid = version.get("id")
+            if vid is not None:
+                return int(vid)
     return None
 
 
@@ -132,28 +135,26 @@ def delete_package_version(
     """
     url = f"https://api.github.com/users/{owner}/packages/container/{package_name}/versions/{version_id}"
     
-    req = request.Request(url, method="DELETE")
-    req.add_header("Accept", "application/vnd.github+json")
-    req.add_header("Authorization", f"Bearer {token}")
-    req.add_header("X-GitHub-Api-Version", "2022-11-28")
+    req = urllib_request.Request(url, method="DELETE")
+    github_actions_utils.add_github_api_headers(req, token)
     
     try:
-        with request.urlopen(req, timeout=30) as response:
+        with urllib_request.urlopen(req, timeout=30) as response:
             if response.status == 204:
                 return True
-            github_action_log(
+            github_actions_utils.github_action_log(
                 "error",
                 f"Unexpected response code {response.status} when deleting version"
             )
             return False
     except HTTPError as e:
-        github_action_log(
+        github_actions_utils.github_action_log(
             "error",
             f"Failed to delete package version (HTTP {e.code}): {e.read().decode()}"
         )
         return False
     except URLError as e:
-        github_action_log("error", f"Network error deleting package version: {e}")
+        github_actions_utils.github_action_log("error", f"Network error deleting package version: {e}")
         return False
 
 
@@ -172,13 +173,13 @@ def main() -> None:
     tag = f"pr-{pr_number}"
     image_name = f"ghcr.io/{repository}"
     
-    log_info(f"Attempting to delete image tag: {image_name}:{tag}")
-    log_info(f"Looking for package: {package_name} with tag: {tag}")
+    github_actions_utils.log_info(f"Attempting to delete image tag: {image_name}:{tag}")
+    github_actions_utils.log_info(f"Looking for package: {package_name} with tag: {tag}")
     
     # Fetch package versions
     versions = get_package_versions(owner, package_name, token)
     if versions is None:
-        log_info(
+        github_actions_utils.log_info(
             f"No image found with tag: {tag} "
             "(this is expected if the PR was closed before the image was published)"
         )
@@ -187,20 +188,20 @@ def main() -> None:
     # Find version ID for the PR tag
     version_id = find_version_id_by_tag(versions, tag)
     if version_id is None:
-        log_info(
+        github_actions_utils.log_info(
             f"No image found with tag: {tag} "
             "(this is expected if the PR was closed before the image was published)"
         )
         sys.exit(0)
     
-    log_info(f"Found version ID: {version_id} for tag {tag}")
+    github_actions_utils.log_info(f"Found version ID: {version_id} for tag {tag}")
     
     # Delete the package version
     if delete_package_version(owner, package_name, version_id, token):
-        log_info(f"Successfully deleted image tag: {tag}")
+        github_actions_utils.log_info(f"Successfully deleted image tag: {tag}")
         sys.exit(0)
     else:
-        github_action_log("error", f"Failed to delete image tag {tag}")
+        github_actions_utils.github_action_log("error", f"Failed to delete image tag {tag}")
         sys.exit(1)
 
 

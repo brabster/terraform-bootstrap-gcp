@@ -15,7 +15,7 @@ import re
 import subprocess
 import sys
 
-from github_actions_utils import github_action_log, log_info, set_github_output
+import github_actions_utils
 
 
 def parse_args() -> argparse.Namespace:
@@ -56,38 +56,41 @@ def parse_args() -> argparse.Namespace:
     
     args = parser.parse_args()
     
-    # Validate PR number is provided for pull_request events
+    # Validate PR number for pull_request events
     if args.event_name == "pull_request" and not args.pr_number:
-        github_action_log("error", "PR number is required for pull_request events")
-        sys.exit(1)
+        parser.error("--pr-number is required for pull_request events")
     
     return args
 
 
-def load_image(tar_path: str) -> None:
+def load_image(image_tar: str) -> None:
     """
-    Load Docker image from tar file.
+    Load Docker image from tar archive.
     
     Args:
-        tar_path: Path to the tar file
+        image_tar: Path to tar archive
         
     Raises:
         SystemExit: If loading fails
     """
+    github_actions_utils.log_info(f"Loading image from {image_tar}")
     try:
-        subprocess.run(
-            ["docker", "load", "-i", tar_path],
+        result = subprocess.run(
+            ["docker", "load", "-i", image_tar],
             check=True,
             capture_output=True,
+            text=True,
             timeout=300
         )
-        log_info(f"Successfully loaded image from {tar_path}")
+        github_actions_utils.log_info(f"Successfully loaded image from {image_tar}")
+        if result.stdout:
+            github_actions_utils.log_info(result.stdout.strip())
     except subprocess.CalledProcessError as e:
-        error_msg = e.stderr.decode() if e.stderr else str(e)
-        github_action_log("error", f"Failed to load image: {error_msg}")
+        error_msg = e.stderr if e.stderr else str(e)
+        github_actions_utils.github_action_log("error", f"Failed to load image: {error_msg}")
         sys.exit(1)
     except subprocess.TimeoutExpired:
-        github_action_log("error", "Image load timed out")
+        github_actions_utils.github_action_log("error", "Image load timed out after 300 seconds")
         sys.exit(1)
 
 
@@ -96,26 +99,28 @@ def docker_tag(source: str, target: str) -> None:
     Tag a Docker image.
     
     Args:
-        source: Source image name
-        target: Target image name
+        source: Source image
+        target: Target image
         
     Raises:
         SystemExit: If tagging fails
     """
+    github_actions_utils.log_info(f"Tagging {source} as {target}")
     try:
         subprocess.run(
             ["docker", "tag", source, target],
             check=True,
             capture_output=True,
-            timeout=30
+            text=True,
+            timeout=60
         )
-        log_info(f"Tagged {source} as {target}")
+        github_actions_utils.log_info(f"Successfully tagged as {target}")
     except subprocess.CalledProcessError as e:
-        error_msg = e.stderr.decode() if e.stderr else str(e)
-        github_action_log("error", f"Failed to tag image: {error_msg}")
+        error_msg = e.stderr if e.stderr else str(e)
+        github_actions_utils.github_action_log("error", f"Failed to tag image: {error_msg}")
         sys.exit(1)
     except subprocess.TimeoutExpired:
-        github_action_log("error", "Image tagging timed out")
+        github_actions_utils.github_action_log("error", "Image tagging timed out after 60 seconds")
         sys.exit(1)
 
 
@@ -124,62 +129,66 @@ def docker_push(image: str) -> str:
     Push a Docker image and extract its digest.
     
     Args:
-        image: Image name to push
+        image: Image to push
         
     Returns:
-        Image digest (sha256:...)
+        Image digest
         
     Raises:
         SystemExit: If push fails or digest cannot be extracted
     """
+    github_actions_utils.log_info(f"Pushing {image}")
     try:
         result = subprocess.run(
             ["docker", "push", image],
             check=True,
             capture_output=True,
-            timeout=600,
-            text=True
+            text=True,
+            timeout=600
         )
-        output = result.stdout + result.stderr
-        log_info(f"Successfully pushed {image}")
         
-        # Extract digest from output (format: "digest: sha256:... size: ...")
-        match = re.search(r'digest:\s+(sha256:[a-f0-9]{64})', output)
-        if not match:
-            github_action_log("error", "Failed to extract digest from docker push output")
-            github_action_log("error", f"Push output was: {output}")
+        # Extract digest from output
+        output = result.stdout + result.stderr
+        digest_match = re.search(r"digest:\s+(sha256:[a-f0-9]{64})", output)
+        
+        if not digest_match:
+            github_actions_utils.github_action_log("error", "Could not extract digest from docker push output")
+            github_actions_utils.log_info(f"Docker push output:\n{output}")
             sys.exit(1)
         
-        digest = match.group(1)
-        log_info(f"Extracted digest: {digest}")
+        digest = digest_match.group(1)
+        github_actions_utils.log_info(f"Successfully pushed {image}")
+        github_actions_utils.log_info(f"Digest: {digest}")
         return digest
         
     except subprocess.CalledProcessError as e:
         error_msg = str(e.stderr) if e.stderr is not None else str(e)
-        github_action_log("error", f"Failed to push image: {error_msg}")
+        github_actions_utils.github_action_log("error", f"Failed to push image: {error_msg}")
         sys.exit(1)
     except subprocess.TimeoutExpired:
-        github_action_log("error", "Image push timed out")
+        github_actions_utils.github_action_log("error", "Image push timed out after 600 seconds")
         sys.exit(1)
 
 
 def main() -> None:
-    """Main entry point for the push script."""
+    """Main function."""
     args = parse_args()
     
-    # Load the image
+    # Load the image from tar
     load_image(args.image_tar)
     
     # Prepare tag names
     registry = f"ghcr.io/{args.repository}"
     
     if args.event_name == "pull_request":
-        # On PR: push only with PR-specific tag
+        # For PRs: push with pr-{number} tag only
         pr_tag = f"{registry}:pr-{args.pr_number}"
+        
         docker_tag("candidate_image:latest", pr_tag)
         digest = docker_push(pr_tag)
-        set_github_output("digest", digest)
-        set_github_output("tag", pr_tag)
+        github_actions_utils.set_github_output("digest", digest)
+        github_actions_utils.set_github_output("tag", pr_tag)
+        
     else:
         # On main: push with both SHA and latest tags
         sha_tag = f"{registry}:{args.sha}"
@@ -188,12 +197,14 @@ def main() -> None:
         # Tag and push SHA version first
         docker_tag("candidate_image:latest", sha_tag)
         digest = docker_push(sha_tag)
-        set_github_output("digest", digest)
+        github_actions_utils.set_github_output("digest", digest)
         
         # Push the latest tag (same image, so same digest)
         docker_tag("candidate_image:latest", latest_tag)
         docker_push(latest_tag)
-        set_github_output("tag", latest_tag)
+        github_actions_utils.set_github_output("tag", latest_tag)
+    
+    github_actions_utils.log_info("Image push completed successfully")
 
 
 if __name__ == "__main__":

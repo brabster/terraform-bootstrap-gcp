@@ -100,7 +100,7 @@ class TestVersionIdLookup(unittest.TestCase):
 class TestGetPackageVersions(unittest.TestCase):
     """Test fetching package versions from GitHub API."""
     
-    @patch('cleanup_pr_image.request.urlopen')
+    @patch('cleanup_pr_image.urllib_request.urlopen')
     def test_get_package_versions_success(self, mock_urlopen):
         """Test successful package versions fetch."""
         mock_response = MagicMock()
@@ -115,7 +115,7 @@ class TestGetPackageVersions(unittest.TestCase):
         self.assertEqual(len(versions), 1)
         self.assertEqual(versions[0]["id"], 123)
     
-    @patch('cleanup_pr_image.request.urlopen')
+    @patch('cleanup_pr_image.urllib_request.urlopen')
     def test_get_package_versions_not_found(self, mock_urlopen):
         """Test package versions fetch when package doesn't exist."""
         from urllib.error import HTTPError
@@ -128,7 +128,7 @@ class TestGetPackageVersions(unittest.TestCase):
         
         self.assertIsNone(versions)
     
-    @patch('cleanup_pr_image.request.urlopen')
+    @patch('cleanup_pr_image.urllib_request.urlopen')
     def test_get_package_versions_other_http_error(self, mock_urlopen):
         """Test package versions fetch with other HTTP errors."""
         from urllib.error import HTTPError
@@ -145,7 +145,7 @@ class TestGetPackageVersions(unittest.TestCase):
 class TestDeletePackageVersion(unittest.TestCase):
     """Test deleting package versions via GitHub API."""
     
-    @patch('cleanup_pr_image.request.urlopen')
+    @patch('cleanup_pr_image.urllib_request.urlopen')
     def test_delete_package_version_success(self, mock_urlopen):
         """Test successful package version deletion."""
         mock_response = MagicMock()
@@ -158,7 +158,7 @@ class TestDeletePackageVersion(unittest.TestCase):
         
         self.assertTrue(result)
     
-    @patch('cleanup_pr_image.request.urlopen')
+    @patch('cleanup_pr_image.urllib_request.urlopen')
     def test_delete_package_version_unexpected_status(self, mock_urlopen):
         """Test package version deletion with unexpected status code."""
         mock_response = MagicMock()
@@ -171,7 +171,7 @@ class TestDeletePackageVersion(unittest.TestCase):
         
         self.assertFalse(result)
     
-    @patch('cleanup_pr_image.request.urlopen')
+    @patch('cleanup_pr_image.urllib_request.urlopen')
     def test_delete_package_version_http_error(self, mock_urlopen):
         """Test package version deletion with HTTP error."""
         from urllib.error import HTTPError
