@@ -13,7 +13,6 @@ Exit codes:
 
 import argparse
 import json
-import subprocess
 import sys
 from typing import Optional
 from urllib import request
