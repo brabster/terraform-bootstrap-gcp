@@ -51,31 +51,8 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="GitHub token with packages:write permission"
     )
-    parser.add_argument(
-        "--actor",
-        required=True,
-        help="GitHub username for authentication"
-    )
     
     return parser.parse_args()
-
-
-def docker_login(token: str, actor: str) -> None:
-    """
-    No-op placeholder for legacy Docker authentication.
-
-    This script authenticates to GitHub Container Registry using the GitHub
-    Packages API with a bearer token, so a Docker login is not required.
-    The function is retained for compatibility with existing callers.
-
-    Args:
-        token: GitHub token (unused)
-        actor: GitHub actor (username, unused)
-    """
-    github_action_log(
-        "notice",
-        "Skipping Docker login; GitHub Packages API bearer token authentication is used instead."
-    )
 
 
 def get_package_versions(
@@ -189,7 +166,6 @@ def main() -> None:
     repository = args.repository
     owner = args.owner
     token = args.token
-    actor = args.actor
     
     # Extract package name from repository
     package_name = repository.split("/")[-1].lower()
@@ -198,9 +174,6 @@ def main() -> None:
     
     github_action_log("notice", f"Attempting to delete image tag: {image_name}:{tag}")
     github_action_log("notice", f"Looking for package: {package_name} with tag: {tag}")
-    
-    # Authenticate to registry
-    docker_login(token, actor)
     
     # Fetch package versions
     versions = get_package_versions(owner, package_name, token)

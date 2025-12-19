@@ -18,5 +18,4 @@ jobs:
             --pr-number "${{ github.event.pull_request.number }}" \
             --repository "${{ github.repository }}" \
             --owner "${{ github.repository_owner }}" \
-            --token "${{ secrets.GITHUB_TOKEN }}" \
-            --actor "${{ github.actor }}"
+            --token "${{ secrets.GITHUB_TOKEN }}"

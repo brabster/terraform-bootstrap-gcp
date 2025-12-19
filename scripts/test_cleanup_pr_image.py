@@ -28,8 +28,7 @@ class TestArgumentParsing(unittest.TestCase):
             "--pr-number", "42",
             "--repository", "owner/repo",
             "--owner", "owner",
-            "--token", "ghp_test123",
-            "--actor", "testuser"
+            "--token", "ghp_test123"
         ]
         
         with patch('sys.argv', test_args):
@@ -39,7 +38,6 @@ class TestArgumentParsing(unittest.TestCase):
         self.assertEqual(args.repository, "owner/repo")
         self.assertEqual(args.owner, "owner")
         self.assertEqual(args.token, "ghp_test123")
-        self.assertEqual(args.actor, "testuser")
 
 
 class TestVersionIdLookup(unittest.TestCase):
@@ -195,8 +193,7 @@ class TestMainFunction(unittest.TestCase):
     @patch('cleanup_pr_image.delete_package_version')
     @patch('cleanup_pr_image.find_version_id_by_tag')
     @patch('cleanup_pr_image.get_package_versions')
-    @patch('cleanup_pr_image.docker_login')
-    def test_main_successful_deletion(self, mock_login, mock_get_versions, 
+    def test_main_successful_deletion(self, mock_get_versions, 
                                       mock_find_version, mock_delete):
         """Test successful main execution with version found and deleted."""
         # Setup mocks
@@ -209,8 +206,7 @@ class TestMainFunction(unittest.TestCase):
             "--pr-number", "42",
             "--repository", "owner/repo",
             "--owner", "owner",
-            "--token", "token123",
-            "--actor", "testuser"
+            "--token", "token123"
         ]
         
         with patch('sys.argv', test_args):
@@ -221,8 +217,7 @@ class TestMainFunction(unittest.TestCase):
         mock_delete.assert_called_once()
     
     @patch('cleanup_pr_image.get_package_versions')
-    @patch('cleanup_pr_image.docker_login')
-    def test_main_package_not_found(self, mock_login, mock_get_versions):
+    def test_main_package_not_found(self, mock_get_versions):
         """Test main when package doesn't exist."""
         mock_get_versions.return_value = None
         
@@ -231,8 +226,7 @@ class TestMainFunction(unittest.TestCase):
             "--pr-number", "42",
             "--repository", "owner/repo",
             "--owner", "owner",
-            "--token", "token123",
-            "--actor", "testuser"
+            "--token", "token123"
         ]
         
         with patch('sys.argv', test_args):
@@ -243,8 +237,7 @@ class TestMainFunction(unittest.TestCase):
     
     @patch('cleanup_pr_image.find_version_id_by_tag')
     @patch('cleanup_pr_image.get_package_versions')
-    @patch('cleanup_pr_image.docker_login')
-    def test_main_version_not_found(self, mock_login, mock_get_versions, mock_find_version):
+    def test_main_version_not_found(self, mock_get_versions, mock_find_version):
         """Test main when version with tag doesn't exist."""
         mock_get_versions.return_value = [{"id": 123}]
         mock_find_version.return_value = None
@@ -254,8 +247,7 @@ class TestMainFunction(unittest.TestCase):
             "--pr-number", "42",
             "--repository", "owner/repo",
             "--owner", "owner",
-            "--token", "token123",
-            "--actor", "testuser"
+            "--token", "token123"
         ]
         
         with patch('sys.argv', test_args):
@@ -267,8 +259,7 @@ class TestMainFunction(unittest.TestCase):
     @patch('cleanup_pr_image.delete_package_version')
     @patch('cleanup_pr_image.find_version_id_by_tag')
     @patch('cleanup_pr_image.get_package_versions')
-    @patch('cleanup_pr_image.docker_login')
-    def test_main_deletion_failed(self, mock_login, mock_get_versions,
+    def test_main_deletion_failed(self, mock_get_versions,
                                    mock_find_version, mock_delete):
         """Test main when deletion fails."""
         mock_get_versions.return_value = [{"id": 123}]
@@ -280,8 +271,7 @@ class TestMainFunction(unittest.TestCase):
             "--pr-number", "42",
             "--repository", "owner/repo",
             "--owner", "owner",
-            "--token", "token123",
-            "--actor", "testuser"
+            "--token", "token123"
         ]
         
         with patch('sys.argv', test_args):

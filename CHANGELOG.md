@@ -9,7 +9,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Pull request builds now publish temporary Docker images with `pr-<number>` tags for testing before merge.
-- Automated PR comments display the published image tag with usage instructions after successful builds.
 - Pull request trigger added to CI workflow with the same path filters as main branch pushes.
 - Automated cleanup workflow deletes PR images when the pull request is closed or merged.
 

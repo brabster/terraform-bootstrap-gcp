@@ -7,7 +7,6 @@ These tests verify core functionality without requiring Docker or actual image o
 
 import sys
 import unittest
-from io import StringIO
 from unittest.mock import patch, MagicMock
 from pathlib import Path
 
