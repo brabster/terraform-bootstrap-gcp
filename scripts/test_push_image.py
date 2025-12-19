@@ -9,7 +9,7 @@ import re
 import sys
 import unittest
 from io import StringIO
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from pathlib import Path
 
 # Add parent directory to path to import the module in a way that works across environments
@@ -147,31 +147,73 @@ class TestOutputFormatting(unittest.TestCase):
         self.assertEqual(captured_stdout.getvalue(), "")
 
 
-class TestTagGeneration(unittest.TestCase):
-    """Test image tag generation logic."""
+class TestMainFunctionTagging(unittest.TestCase):
+    """Test main function tagging logic with different event types."""
     
-    def test_pr_tag_format(self):
-        """Test PR tag format is correct."""
-        repository = "owner/repo"
-        pr_number = "123"
-        expected_tag = f"ghcr.io/{repository}:pr-{pr_number}"
+    @patch('push_image.docker_push')
+    @patch('push_image.docker_tag')
+    @patch('push_image.load_image')
+    @patch('push_image.set_github_output')
+    def test_pr_event_uses_pr_tag(self, mock_output, mock_load, mock_tag, mock_push):
+        """Test that PR events use pr-<number> tag."""
+        from unittest.mock import MagicMock
+        mock_push.return_value = "sha256:abc123"
         
-        self.assertEqual(expected_tag, "ghcr.io/owner/repo:pr-123")
+        test_args = [
+            "push_image.py",
+            "--event-name", "pull_request",
+            "--repository", "owner/repo",
+            "--sha", "abc123",
+            "--pr-number", "42",
+            "--image-tar", "/path/to/image.tar"
+        ]
+        
+        with patch('sys.argv', test_args):
+            push_image.main()
+        
+        # Verify PR tag was used
+        mock_tag.assert_called_once_with("candidate_image:latest", "ghcr.io/owner/repo:pr-42")
+        mock_push.assert_called_once_with("ghcr.io/owner/repo:pr-42")
+        
+        # Verify outputs were set correctly
+        output_calls = [call[0] for call in mock_output.call_args_list]
+        self.assertIn(('digest', 'sha256:abc123'), output_calls)
+        self.assertIn(('tag', 'ghcr.io/owner/repo:pr-42'), output_calls)
     
-    def test_sha_tag_format(self):
-        """Test SHA tag format is correct."""
-        repository = "owner/repo"
-        sha = "abc123def456"
-        expected_tag = f"ghcr.io/{repository}:{sha}"
+    @patch('push_image.docker_push')
+    @patch('push_image.docker_tag')
+    @patch('push_image.load_image')
+    @patch('push_image.set_github_output')
+    def test_main_event_uses_sha_and_latest_tags(self, mock_output, mock_load, mock_tag, mock_push):
+        """Test that main branch push uses SHA and latest tags."""
+        from unittest.mock import MagicMock
+        mock_push.return_value = "sha256:def456"
         
-        self.assertEqual(expected_tag, "ghcr.io/owner/repo:abc123def456")
-    
-    def test_latest_tag_format(self):
-        """Test latest tag format is correct."""
-        repository = "owner/repo"
-        expected_tag = f"ghcr.io/{repository}:latest"
+        test_args = [
+            "push_image.py",
+            "--event-name", "push",
+            "--repository", "owner/repo",
+            "--sha", "abc123def",
+            "--image-tar", "/path/to/image.tar"
+        ]
         
-        self.assertEqual(expected_tag, "ghcr.io/owner/repo:latest")
+        with patch('sys.argv', test_args):
+            push_image.main()
+        
+        # Verify both SHA and latest tags were used
+        tag_calls = [call[0] for call in mock_tag.call_args_list]
+        self.assertIn(("candidate_image:latest", "ghcr.io/owner/repo:abc123def"), tag_calls)
+        self.assertIn(("candidate_image:latest", "ghcr.io/owner/repo:latest"), tag_calls)
+        
+        # Verify both tags were pushed
+        push_calls = [call[0][0] for call in mock_push.call_args_list]
+        self.assertIn("ghcr.io/owner/repo:abc123def", push_calls)
+        self.assertIn("ghcr.io/owner/repo:latest", push_calls)
+        
+        # Verify outputs were set
+        output_calls = [call[0] for call in mock_output.call_args_list]
+        self.assertIn(('digest', 'sha256:def456'), output_calls)
+        self.assertIn(('tag', 'ghcr.io/owner/repo:latest'), output_calls)
 
 
 if __name__ == '__main__':
