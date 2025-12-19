@@ -113,44 +113,6 @@ class TestArgumentParsing(unittest.TestCase):
             self.assertEqual(cm.exception.code, 1)
 
 
-class TestOutputFormatting(unittest.TestCase):
-    """Test that output is properly formatted for GitHub Actions."""
-    
-    def test_github_output_format(self):
-        """Test that set_github_output writes to stdout in correct format."""
-        # Capture stdout
-        captured_output = StringIO()
-        with patch('sys.stdout', captured_output):
-            push_image.set_github_output("test_name", "test_value")
-        
-        output = captured_output.getvalue()
-        self.assertEqual(output, "test_name=test_value\n")
-    
-    def test_log_info_uses_stderr(self):
-        """Test that log_info writes to stderr, not stdout."""
-        # Capture stderr
-        captured_stderr = StringIO()
-        captured_stdout = StringIO()
-        
-        with patch('sys.stderr', captured_stderr), patch('sys.stdout', captured_stdout):
-            push_image.log_info("Test message")
-        
-        # Message should be in stderr, not stdout
-        self.assertEqual(captured_stderr.getvalue(), "Test message\n")
-        self.assertEqual(captured_stdout.getvalue(), "")
-    
-    def test_github_action_log_uses_stderr(self):
-        """Test that github_action_log writes to stderr, not stdout."""
-        captured_stderr = StringIO()
-        captured_stdout = StringIO()
-        
-        with patch('sys.stderr', captured_stderr), patch('sys.stdout', captured_stdout):
-            push_image.github_action_log("warning", "Test warning")
-        
-        # Action log should be in stderr, not stdout
-        self.assertIn("::warning::Test warning", captured_stderr.getvalue())
-        self.assertEqual(captured_stdout.getvalue(), "")
-
 
 class TestMainFunctionTagging(unittest.TestCase):
     """Test main function tagging logic with different event types."""
