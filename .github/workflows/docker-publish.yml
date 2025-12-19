@@ -20,10 +20,21 @@ on:
       - scripts/**
 
 jobs:
+  test_scripts:
+    runs-on: ubuntu-latest # maintained by GitHub
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v3 # maintained by GitHub
+
+    - name: Run Python script unit tests
+      run: python3 scripts/test_push_image.py
+
   build_and_load:
     runs-on: ubuntu-latest # maintained by GitHub
     permissions:
       contents: read
+    needs: test_scripts
     steps:
     - uses: actions/checkout@v3 # maintained by GitHub
 
