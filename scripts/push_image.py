@@ -155,7 +155,7 @@ def docker_push(image: str) -> str:
         return digest
         
     except subprocess.CalledProcessError as e:
-        error_msg = e.stderr.decode() if e.stderr else str(e)
+        error_msg = str(e.stderr) if e.stderr is not None else str(e)
         github_action_log("error", f"Failed to push image: {error_msg}")
         sys.exit(1)
     except subprocess.TimeoutExpired:
