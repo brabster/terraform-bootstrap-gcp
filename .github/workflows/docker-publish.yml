@@ -12,12 +12,41 @@ on:
       - requirements.txt
       - .github/**
       - scripts/**
+  pull_request:
+    paths:
+      - Dockerfile
+      - requirements.txt
+      - .github/**
+      - scripts/**
 
 jobs:
+  test_scripts:
+    runs-on: ubuntu-latest # maintained by GitHub
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v3 # maintained by GitHub
+
+    - name: Install mypy for type checking
+      run: python3 -m pip install --quiet mypy
+
+    - name: Run mypy type checking
+      run: |
+        python3 -m mypy --strict --no-error-summary scripts/github_actions_utils.py
+        python3 -m mypy --strict --no-error-summary scripts/push_image.py
+        python3 -m mypy --strict --no-error-summary scripts/cleanup_pr_image.py
+
+    - name: Run Python script unit tests
+      run: |
+        python3 scripts/test_github_actions_utils.py
+        python3 scripts/test_push_image.py
+        python3 scripts/test_cleanup_pr_image.py
+
   build_and_load:
     runs-on: ubuntu-latest # maintained by GitHub
     permissions:
       contents: read
+    needs: test_scripts
     steps:
     - uses: actions/checkout@v3 # maintained by GitHub
 
@@ -147,6 +176,8 @@ jobs:
       - test_osv_scanner_wrapper
     steps:
 
+    - uses: actions/checkout@v3 # maintained by GitHub
+
     - name: Download image artifact
       uses: actions/download-artifact@v4 # maintained by GitHub
       with:
@@ -158,29 +189,17 @@ jobs:
 
     # Push the image and capture its digest for attestation
     # The digest uniquely identifies the image content and is required for attestation
+    # On main branch: push with 'latest' and SHA tags for production use
+    # On pull request: push with 'pr-<number>' tag for testing without affecting production tags
     - name: Push tagged image
       id: push
-      env:
-        DOCKER_SHA_TAG: ghcr.io/${{ github.repository }}:${{ github.sha }}
-        DOCKER_LATEST_TAG: ghcr.io/${{ github.repository }}:latest
       run: |
-        set -euo pipefail
-        docker load -i ${{ runner.temp }}/candidate_image.tar
-        # Tag and push the SHA-tagged version first, capturing the digest from push output
-        # docker push outputs the digest in the format "digest: sha256:... size: ..."
-        # We extract the digest directly from this output without depending on docker inspect
-        docker tag candidate_image:latest $DOCKER_SHA_TAG
-        PUSH_OUTPUT=$(docker push $DOCKER_SHA_TAG)
-        DIGEST=$(echo "$PUSH_OUTPUT" | grep -oP 'digest: \K(sha256:[a-f0-9]{64})')
-        if [ -z "$DIGEST" ]; then
-          echo "::error::Failed to extract digest from docker push output"
-          echo "Push output was: $PUSH_OUTPUT"
-          exit 1
-        fi
-        echo "digest=$DIGEST" >> $GITHUB_OUTPUT
-        # Push the latest tag (same image, so same digest)
-        docker tag candidate_image:latest $DOCKER_LATEST_TAG
-        docker push $DOCKER_LATEST_TAG
+        python3 scripts/push_image.py \
+          --event-name "${{ github.event_name }}" \
+          --repository "${{ github.repository }}" \
+          --sha "${{ github.sha }}" \
+          ${{ github.event_name == 'pull_request' && format('--pr-number "{0}"', github.event.pull_request.number) || '' }} \
+          --image-tar "${{ runner.temp }}/candidate_image.tar" >> $GITHUB_OUTPUT
 
     # Generate build provenance attestations for the published Docker images
     # This creates cryptographically signed attestations that prove:

@@ -1,0 +1,21 @@
+name: Cleanup PR Images
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest # maintained by GitHub
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v3 # maintained by GitHub
+
+      - name: Delete PR image
+        run: |
+          python3 scripts/cleanup_pr_image.py \
+            --pr-number "${{ github.event.pull_request.number }}" \
+            --repository "${{ github.repository }}" \
+            --owner "${{ github.repository_owner }}" \
+            --token "${{ secrets.GITHUB_TOKEN }}"

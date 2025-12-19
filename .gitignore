@@ -1,2 +1,5 @@
 /uncommitted/
 !/uncommitted/README.md
+__pycache__/
+*.pyc
+*.pyo
