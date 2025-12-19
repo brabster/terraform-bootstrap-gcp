@@ -161,7 +161,6 @@ class TestMainFunctionTagging(unittest.TestCase):
     @patch('push_image.set_github_output')
     def test_pr_event_uses_pr_tag(self, mock_output, mock_load, mock_tag, mock_push):
         """Test that PR events use pr-<number> tag."""
-        from unittest.mock import MagicMock
         mock_push.return_value = "sha256:abc123"
         
         test_args = [
