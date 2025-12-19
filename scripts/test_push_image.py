@@ -5,7 +5,6 @@ Unit tests for push_image.py script.
 These tests verify core functionality without requiring Docker or actual image operations.
 """
 
-import re
 import sys
 import unittest
 from io import StringIO
@@ -22,35 +21,41 @@ import push_image
 class TestDigestExtraction(unittest.TestCase):
     """Test digest extraction from docker push output."""
     
-    def test_extract_digest_from_valid_output(self):
-        """Test that digest is correctly extracted from valid docker push output."""
-        # Simulate docker push output
-        mock_output = """
+    @patch('push_image.subprocess.run')
+    def test_docker_push_extracts_digest_from_valid_output(self, mock_run):
+        """Test that docker_push correctly extracts digest from valid output."""
+        # Mock subprocess.run to return valid docker push output
+        mock_result = MagicMock()
+        mock_result.stdout = """
 The push refers to repository [ghcr.io/test/repo]
 abc123: Pushed
 def456: Pushed
 latest: digest: sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef size: 1234
         """
+        mock_result.stderr = ""
+        mock_run.return_value = mock_result
         
-        match = re.search(r'digest:\s+(sha256:[a-f0-9]{64})', mock_output)
-        self.assertIsNotNone(match)
-        digest = match.group(1)
+        # Call the actual docker_push function
+        digest = push_image.docker_push("ghcr.io/test/repo:latest")
+        
+        # Verify the digest was extracted correctly
         self.assertEqual(digest, "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")
         self.assertTrue(digest.startswith("sha256:"))
         self.assertEqual(len(digest), 71)  # "sha256:" (7) + 64 hex chars
     
-    def test_extract_digest_invalid_format(self):
-        """Test that extraction fails gracefully with invalid output."""
-        invalid_outputs = [
-            "No digest here",
-            "digest: sha256:tooshort",
-            "digest: md5:1234567890abcdef",
-            "",
-        ]
+    @patch('push_image.subprocess.run')
+    def test_docker_push_fails_with_invalid_output(self, mock_run):
+        """Test that docker_push exits when digest cannot be extracted."""
+        # Mock subprocess.run to return invalid output
+        mock_result = MagicMock()
+        mock_result.stdout = "No digest here"
+        mock_result.stderr = ""
+        mock_run.return_value = mock_result
         
-        for output in invalid_outputs:
-            match = re.search(r'digest:\s+(sha256:[a-f0-9]{64})', output)
-            self.assertIsNone(match, f"Should not match invalid output: {output}")
+        # Should exit with error
+        with self.assertRaises(SystemExit) as cm:
+            push_image.docker_push("ghcr.io/test/repo:latest")
+        self.assertEqual(cm.exception.code, 1)
 
 
 class TestArgumentParsing(unittest.TestCase):
