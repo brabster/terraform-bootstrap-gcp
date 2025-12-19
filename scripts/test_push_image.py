@@ -10,9 +10,12 @@ import sys
 import unittest
 from io import StringIO
 from unittest.mock import patch
+from pathlib import Path
 
-# Add parent directory to path to import the module
-sys.path.insert(0, '/home/runner/work/terraform-bootstrap-gcp/terraform-bootstrap-gcp/scripts')
+# Add parent directory to path to import the module in a way that works across environments
+script_dir = str(Path(__file__).resolve().parent)
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
 import push_image
 
 
