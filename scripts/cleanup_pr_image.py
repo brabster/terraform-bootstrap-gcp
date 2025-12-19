@@ -14,7 +14,7 @@ Exit codes:
 import argparse
 import json
 import sys
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, Dict, List, cast
 from urllib import request as urllib_request
 from urllib.error import HTTPError, URLError
 
@@ -77,7 +77,6 @@ def get_package_versions(
     try:
         with urllib_request.urlopen(req, timeout=30) as response:
             data = response.read().decode()
-            from typing import cast
             result = json.loads(data)
             return cast(List[Dict[str, Any]], result)
     except HTTPError as e:
