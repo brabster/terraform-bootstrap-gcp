@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Pull request builds now publish temporary Docker images with `pr-<number>` tags for testing before merge.
 - Pull request trigger added to CI workflow with the same path filters as main branch pushes.
 - Automated cleanup workflow deletes PR images when the pull request is closed or merged.
+- Python scripts for workflow orchestration with argparse-based CLI interfaces (`push_image.py`, `cleanup_pr_image.py`).
+- Shared utilities module (`github_actions_utils.py`) for common GitHub Actions functionality.
+- Comprehensive unit test suite (25 tests) for workflow scripts, running before Docker build to fail fast.
 
 ### Changed
 

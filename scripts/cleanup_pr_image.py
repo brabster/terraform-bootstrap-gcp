@@ -18,7 +18,7 @@ from typing import Optional
 from urllib import request
 from urllib.error import HTTPError, URLError
 
-from github_actions_utils import github_action_log
+from github_actions_utils import github_action_log, log_info
 
 
 def parse_args() -> argparse.Namespace:
@@ -172,14 +172,13 @@ def main() -> None:
     tag = f"pr-{pr_number}"
     image_name = f"ghcr.io/{repository}"
     
-    github_action_log("notice", f"Attempting to delete image tag: {image_name}:{tag}")
-    github_action_log("notice", f"Looking for package: {package_name} with tag: {tag}")
+    log_info(f"Attempting to delete image tag: {image_name}:{tag}")
+    log_info(f"Looking for package: {package_name} with tag: {tag}")
     
     # Fetch package versions
     versions = get_package_versions(owner, package_name, token)
     if versions is None:
-        github_action_log(
-            "notice",
+        log_info(
             f"No image found with tag: {tag} "
             "(this is expected if the PR was closed before the image was published)"
         )
@@ -188,18 +187,17 @@ def main() -> None:
     # Find version ID for the PR tag
     version_id = find_version_id_by_tag(versions, tag)
     if version_id is None:
-        github_action_log(
-            "notice",
+        log_info(
             f"No image found with tag: {tag} "
             "(this is expected if the PR was closed before the image was published)"
         )
         sys.exit(0)
     
-    github_action_log("notice", f"Found version ID: {version_id} for tag {tag}")
+    log_info(f"Found version ID: {version_id} for tag {tag}")
     
     # Delete the package version
     if delete_package_version(owner, package_name, version_id, token):
-        github_action_log("notice", f"Successfully deleted image tag: {tag}")
+        log_info(f"Successfully deleted image tag: {tag}")
         sys.exit(0)
     else:
         github_action_log("error", f"Failed to delete image tag {tag}")

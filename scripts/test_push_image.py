@@ -55,6 +55,88 @@ latest: digest: sha256:1234567890abcdef1234567890abcdef1234567890abcdef123456789
         with self.assertRaises(SystemExit) as cm:
             push_image.docker_push("ghcr.io/test/repo:latest")
         self.assertEqual(cm.exception.code, 1)
+    
+    @patch('push_image.subprocess.run')
+    def test_docker_push_handles_calledprocesserror_with_stderr(self, mock_run):
+        """Test that docker_push handles CalledProcessError with stderr correctly."""
+        import subprocess
+        # Mock subprocess.run to raise CalledProcessError with stderr
+        mock_run.side_effect = subprocess.CalledProcessError(
+            returncode=1,
+            cmd=['docker', 'push', 'test'],
+            stderr=b"Permission denied"
+        )
+        
+        # Should exit with error
+        with self.assertRaises(SystemExit) as cm:
+            push_image.docker_push("ghcr.io/test/repo:latest")
+        self.assertEqual(cm.exception.code, 1)
+    
+    @patch('push_image.subprocess.run')
+    def test_docker_push_handles_calledprocesserror_without_stderr(self, mock_run):
+        """Test that docker_push handles CalledProcessError when stderr is None."""
+        import subprocess
+        # Mock subprocess.run to raise CalledProcessError with None stderr
+        error = subprocess.CalledProcessError(
+            returncode=1,
+            cmd=['docker', 'push', 'test']
+        )
+        error.stderr = None
+        mock_run.side_effect = error
+        
+        # Should exit with error without AttributeError
+        with self.assertRaises(SystemExit) as cm:
+            push_image.docker_push("ghcr.io/test/repo:latest")
+        self.assertEqual(cm.exception.code, 1)
+    
+    @patch('push_image.subprocess.run')
+    def test_docker_push_handles_timeout(self, mock_run):
+        """Test that docker_push handles TimeoutExpired correctly."""
+        import subprocess
+        # Mock subprocess.run to raise TimeoutExpired
+        mock_run.side_effect = subprocess.TimeoutExpired(
+            cmd=['docker', 'push', 'test'],
+            timeout=60
+        )
+        
+        # Should exit with error
+        with self.assertRaises(SystemExit) as cm:
+            push_image.docker_push("ghcr.io/test/repo:latest")
+        self.assertEqual(cm.exception.code, 1)
+    
+    @patch('push_image.subprocess.run')
+    def test_load_image_handles_calledprocesserror_without_stderr(self, mock_run):
+        """Test that load_image handles CalledProcessError when stderr is None."""
+        import subprocess
+        # Mock subprocess.run to raise CalledProcessError with None stderr
+        error = subprocess.CalledProcessError(
+            returncode=1,
+            cmd=['docker', 'load', '-i', 'test.tar']
+        )
+        error.stderr = None
+        mock_run.side_effect = error
+        
+        # Should exit with error without AttributeError
+        with self.assertRaises(SystemExit) as cm:
+            push_image.load_image("test.tar")
+        self.assertEqual(cm.exception.code, 1)
+    
+    @patch('push_image.subprocess.run')
+    def test_docker_tag_handles_calledprocesserror_without_stderr(self, mock_run):
+        """Test that docker_tag handles CalledProcessError when stderr is None."""
+        import subprocess
+        # Mock subprocess.run to raise CalledProcessError with None stderr
+        error = subprocess.CalledProcessError(
+            returncode=1,
+            cmd=['docker', 'tag', 'source', 'target']
+        )
+        error.stderr = None
+        mock_run.side_effect = error
+        
+        # Should exit with error without AttributeError
+        with self.assertRaises(SystemExit) as cm:
+            push_image.docker_tag("source", "target")
+        self.assertEqual(cm.exception.code, 1)
 
 
 class TestArgumentParsing(unittest.TestCase):
