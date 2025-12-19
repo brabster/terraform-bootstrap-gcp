@@ -7,8 +7,7 @@ These tests verify core functionality without requiring actual API calls or auth
 
 import sys
 import unittest
-from io import StringIO
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 from pathlib import Path
 import json
 
