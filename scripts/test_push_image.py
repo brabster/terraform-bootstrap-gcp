@@ -64,7 +64,7 @@ latest: digest: sha256:1234567890abcdef1234567890abcdef1234567890abcdef123456789
         mock_run.side_effect = subprocess.CalledProcessError(
             returncode=1,
             cmd=['docker', 'push', 'test'],
-            stderr=b"Permission denied"
+            stderr="Permission denied"
         )
         
         # Should exit with error
