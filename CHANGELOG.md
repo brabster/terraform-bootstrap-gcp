@@ -4,6 +4,61 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [[#66](https://github.com/brabster/terraform-bootstrap-gcp/pull/66)] - Replace global venv with system pip to eliminate venv detection issues
+
+### Added
+
+- Added python3-pip package to runtime dependencies for Python package management
+- Added comprehensive smoke tests in validate_image.sh to verify:
+  - Python is not in a venv (sys.prefix == sys.base_prefix)
+  - Users can create local venvs without issues
+  - The user script pattern from the original issue works correctly
+
+### Changed
+
+- Replaced global venv approach with system pip upgraded using `--break-system-packages` flag
+- Simplified Dockerfile by removing multi-stage build (no longer needed)
+- Updated setup_python.sh to upgrade pip and setuptools directly on system Python
+
+### Removed
+
+- Removed builder stage from Dockerfile (no longer building venv)
+- Removed venv creation and copying logic
+- Removed PATH manipulation for venv
+- Removed CLOUDSDK_PYTHON environment variable (uses system Python directly)
+
+### Fixed
+
+- Fixed venv detection confusion where Python reported `sys.prefix != sys.base_prefix` as True
+- Fixed permission errors when users tried to install packages (original issue)
+- Fixed compatibility issues with Python tools (poetry, tox, IDEs) that check venv status
+
+### Rationale
+
+The previous approach used a Python virtual environment at `/opt/python-venv` as the system Python installation. While this achieved the goal of having updated pip and setuptools versions, it created several issues:
+
+1. **Venv detection confusion**: Python reported it was in a venv, causing user scripts that check `sys.prefix != sys.base_prefix` to skip creating local venvs and try to install globally, leading to permission errors
+2. **Non-standard pattern**: Most Python containers use system pip or build from source, not a global venv
+3. **Tool compatibility**: Python tools may behave unexpectedly when detecting a venv
+4. **User expectations**: Sophisticated users expect system Python, not a venv
+
+The new approach uses system pip with `--break-system-packages` flag to upgrade pip and setuptools directly. This:
+- Eliminates venv detection confusion completely
+- Follows standard container patterns
+- Maintains the security goal of having current pip/setuptools versions
+- Provides more predictable behavior for users
+- Improves compatibility with Python tooling
+
+### Security
+
+- No change to security vulnerabilities or attack surface
+- Maintains upgraded pip and setuptools versions (same security posture)
+- Simpler architecture reduces complexity and potential for misconfiguration
+- The `--break-system-packages` flag is intended for isolated environments like containers
+- Still maintains separation from Ubuntu's package management
+
+  - **Security Posture Impact:** Neutral to slightly positive. This change maintains the same security benefits (updated pip/setuptools) while reducing architectural complexity. The simplified single-stage build is easier to audit and maintain. The change does not introduce new attack vectors or vulnerable components.
+
 ## [[#62](https://github.com/brabster/terraform-bootstrap-gcp/pull/62)] - Test build process on PR instead of when merged
 
 ### Added
