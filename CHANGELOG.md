@@ -10,8 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added python3-venv package to the final image runtime dependencies to enable users to create local virtual environments.
 - Added smoke tests in validate_image.sh to verify Python package installation works in both the global venv and local venvs.
-  - Test installing a package in the global venv to verify permissions are correct.
-  - Test creating a local venv and installing packages to verify the complete workflow.
+  - Test installing wheel (Python Packaging Authority) in the global venv to verify permissions are correct.
+  - Test creating a local venv and installing requests to verify the complete workflow.
 
 ### Changed
 

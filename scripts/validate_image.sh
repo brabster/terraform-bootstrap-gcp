@@ -64,14 +64,15 @@ check_user_context() {
 check_python_package_installation() {
   echo "--- Checking Python package installation in global venv ---"
   
-  # Try to install a lightweight package to test permissions
-  if ! pip install --no-cache-dir cowsay; then
+  # Try to install wheel (Python Packaging Authority) to test permissions
+  # wheel is a core Python packaging tool from PyPA, the same trusted maintainer as pip
+  if ! pip install --no-cache-dir wheel; then
     echo "Error: Failed to install Python package in global venv" >&2
     exit 1
   fi
   
   # Verify the package was installed
-  if ! python -c "import cowsay"; then
+  if ! python -c "import wheel"; then
     echo "Error: Package installed but cannot be imported" >&2
     exit 1
   fi
