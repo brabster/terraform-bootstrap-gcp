@@ -58,6 +58,101 @@ check_user_context() {
   echo "User checks passed."
 }
 
+# Verifies that Python is not in a venv (sys.prefix == sys.base_prefix).
+# This ensures users won't encounter venv detection confusion.
+# Exits with a clear error message if check fails.
+check_python_not_in_venv() {
+  echo "--- Checking Python is not in a venv ---"
+  
+  local is_in_venv
+  is_in_venv=$(python -c 'import sys; print(sys.prefix != sys.base_prefix)')
+  
+  if [[ "${is_in_venv}" == "True" ]]; then
+    echo "Error: Python reports it is in a venv (sys.prefix != sys.base_prefix)" >&2
+    echo "  sys.prefix: $(python -c 'import sys; print(sys.prefix)')" >&2
+    echo "  sys.base_prefix: $(python -c 'import sys; print(sys.base_prefix)')" >&2
+    exit 1
+  fi
+  
+  echo "Python is correctly using system installation (not in a venv)."
+}
+
+# Verifies that users can create local virtual environments.
+# Tests the common workflow of creating a venv and installing packages.
+# Exits with a clear error message if check fails.
+check_local_venv_creation() {
+  echo "--- Checking local venv creation and package installation ---"
+  
+  local test_venv_dir
+  test_venv_dir=$(mktemp -d)
+  
+  # Create a local venv
+  if ! python -m venv "${test_venv_dir}/test-venv"; then
+    echo "Error: Failed to create local venv" >&2
+    rm -rf "${test_venv_dir}"
+    exit 1
+  fi
+  
+  # Install a package in the venv
+  if ! "${test_venv_dir}/test-venv/bin/pip" install --no-cache-dir wheel; then
+    echo "Error: Failed to install package in local venv" >&2
+    rm -rf "${test_venv_dir}"
+    exit 1
+  fi
+  
+  # Verify the package works
+  if ! "${test_venv_dir}/test-venv/bin/python" -c "import wheel"; then
+    echo "Error: Package installed in local venv but cannot be imported" >&2
+    rm -rf "${test_venv_dir}"
+    exit 1
+  fi
+  
+  rm -rf "${test_venv_dir}"
+  echo "Local venv creation and package installation works correctly."
+}
+
+# Verifies that the user script pattern from the issue works correctly.
+# Simulates the script that was failing in the original issue.
+# Exits with a clear error message if check fails.
+check_user_script_pattern() {
+  echo "--- Checking user script pattern from issue ---"
+  
+  local test_dir
+  test_dir=$(mktemp -d)
+  cd "${test_dir}"
+  
+  # Simulate the user's script logic
+  local IS_RUNNING_IN_VENV
+  IS_RUNNING_IN_VENV="$(python -c 'import sys; print(sys.prefix != sys.base_prefix)')"
+  
+  if [[ "${IS_RUNNING_IN_VENV}" == "False" ]]; then
+    # Should create a new venv since we're not in one
+    if ! python -m venv venv; then
+      echo "Error: Failed to create venv in user script pattern" >&2
+      cd - > /dev/null
+      rm -rf "${test_dir}"
+      exit 1
+    fi
+    
+    # Install a test package
+    if ! ./venv/bin/pip install --no-cache-dir requests; then
+      echo "Error: Failed to install package in user script pattern" >&2
+      cd - > /dev/null
+      rm -rf "${test_dir}"
+      exit 1
+    fi
+  else
+    echo "Error: Script detected it's in a venv when it shouldn't be" >&2
+    cd - > /dev/null
+    rm -rf "${test_dir}"
+    exit 1
+  fi
+  
+  cd - > /dev/null
+  rm -rf "${test_dir}"
+  echo "User script pattern works correctly."
+}
+
 # The main entry point for the script.
 main() {
   echo "--- Checking Terraform ---"
@@ -75,6 +170,12 @@ main() {
   check_git_completion
 
   check_user_context
+
+  check_python_not_in_venv
+
+  check_local_venv_creation
+
+  check_user_script_pattern
 
   echo
   echo "All pre-flight checks passed successfully."

@@ -1,12 +1,26 @@
 # syntax=docker/dockerfile:1
 
-# Builder stage: install build dependencies and Python packages
-FROM docker.io/ubuntu:latest AS builder
+FROM docker.io/ubuntu:latest
+
+ARG BUILD_DATE
+ARG VCS_REF
+
+LABEL org.opencontainers.image.title="terraform-bootstrap-gcp"
+LABEL org.opencontainers.image.description="This repository contains a container image build (Dockerfile).\nThe image is for use in VSCode in GitHub Codespaces and GitHub actions. We want to produce a single image that works well with both.\nThis image MUST follow good practice for building images, and MUST follow good practices for securing images.\n\nThe image will be rebuilt on a daily basis, and must pick up the latest updates as part of that rebuild.\n\nThe image supports Python 3-based development and should use the latest version of Python available.\nIt also includes the latest version of the gcloud command line tools."
+LABEL org.opencontainers.image.url="https://github.com/brabster/terraform-bootstrap-gcp"
+LABEL org.opencontainers.image.source="https://github.com/brabster/terraform-bootstrap-gcp"
+LABEL org.opencontainers.image.created=$BUILD_DATE
+LABEL org.opencontainers.image.revision=$VCS_REF
+LABEL org.opencontainers.image.licenses="MIT"
 
 COPY scripts/ /tmp/scripts/
 
-# Install build dependencies required for pip package compilation
+# Install third party software, git (Canonical), bash-completion (Canonical), and ca-certificates (Canonical) for HTTPS certificate validation
+# Install python3-pip (Canonical) and python3-venv (Canonical) for Python package management
 # Install proxy certificate if provided (for environments with intercepting proxies)
+# Upgrade pip and setuptools to latest versions for security
+# Delete bundled python from gcloud (removed cryptography vulnerability, reduces image size)
+# Remove build-only packages (gnupg, lsb-release, wget) and unnecessary utilities (unminimize) after use to reduce attack surface
 #
 # Implementation note: We use --mount=type=secret for the certificate because:
 # - It keeps the certificate out of the build context (avoiding context pollution)
@@ -34,37 +48,9 @@ RUN --mount=type=secret,id=proxy_cert,required=false \
     && /tmp/scripts/install_proxy_cert.sh "$([ -f /run/secrets/proxy_cert ] && echo /run/secrets/proxy_cert || echo '')" \
     && apt-get update \
     && apt-get -y upgrade \
-    && apt-get install -y --no-install-recommends python3 python3-venv build-essential \
+    && apt-get install -y --no-install-recommends gnupg lsb-release wget bash-completion git python3 python3-pip python3-venv ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
-    && /tmp/scripts/setup_python.sh
-
-# Final stage: runtime dependencies only
-FROM docker.io/ubuntu:latest
-
-ARG BUILD_DATE
-ARG VCS_REF
-
-LABEL org.opencontainers.image.title="terraform-bootstrap-gcp"
-LABEL org.opencontainers.image.description="This repository contains a container image build (Dockerfile).\nThe image is for use in VSCode in GitHub Codespaces and GitHub actions. We want to produce a single image that works well with both.\nThis image MUST follow good practice for building images, and MUST follow good practices for securing images.\n\nThe image will be rebuilt on a daily basis, and must pick up the latest updates as part of that rebuild.\n\nThe image supports Python 3-based development and should use the latest version of Python available.\nIt also includes the latest version of the gcloud command line tools."
-LABEL org.opencontainers.image.url="https://github.com/brabster/terraform-bootstrap-gcp"
-LABEL org.opencontainers.image.source="https://github.com/brabster/terraform-bootstrap-gcp"
-LABEL org.opencontainers.image.created=$BUILD_DATE
-LABEL org.opencontainers.image.revision=$VCS_REF
-LABEL org.opencontainers.image.licenses="MIT"
-
-COPY scripts/ /tmp/scripts/
-
-# Install third party software, git (Canonical), bash-completion (Canonical), and ca-certificates (Canonical) for HTTPS certificate validation
-# Install proxy certificate if provided (for environments with intercepting proxies)
-# Delete bundled python from gcloud (removed cryptography vulnerability, reduces image size)
-# Remove build-only packages (gnupg, lsb-release, wget) and unnecessary utilities (unminimize) after use to reduce attack surface
-RUN --mount=type=secret,id=proxy_cert,required=false \
-    chmod +x /tmp/scripts/* \
-    && /tmp/scripts/install_proxy_cert.sh "$([ -f /run/secrets/proxy_cert ] && echo /run/secrets/proxy_cert || echo '')" \
-    && apt-get update \
-    && apt-get -y upgrade \
-    && apt-get install -y --no-install-recommends gnupg lsb-release wget bash-completion git python3 ca-certificates \
-    && rm -rf /var/lib/apt/lists/* \
+    && /tmp/scripts/setup_python.sh \
     && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
     && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
     && rm -rf /usr/lib/google-cloud-sdk/platform/bundledpythonunix \
@@ -73,14 +59,8 @@ RUN --mount=type=secret,id=proxy_cert,required=false \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/scripts
 
-# Copy Python virtual environment from builder
-COPY --from=builder /opt/python-venv /opt/python-venv
-
-# Create global python alias and configure environment to use venv
-# Point gcloud tooling at venv python (instead of bundled python that was deleted above)
-ENV PATH="/opt/python-venv/bin:$PATH"
-ENV CLOUDSDK_PYTHON=/opt/python-venv/bin/python
-RUN ln -s /opt/python-venv/bin/python3 /usr/bin/python
+# Create global python alias for convenience
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 USER ubuntu
 
