@@ -65,13 +65,13 @@ check_python_package_installation() {
   echo "--- Checking Python package installation in global venv ---"
   
   # Try to install a lightweight package to test permissions
-  if ! pip install --no-cache-dir cowsay 2>&1; then
+  if ! pip install --no-cache-dir cowsay; then
     echo "Error: Failed to install Python package in global venv" >&2
     exit 1
   fi
   
   # Verify the package was installed
-  if ! python -c "import cowsay" 2>&1; then
+  if ! python -c "import cowsay"; then
     echo "Error: Package installed but cannot be imported" >&2
     exit 1
   fi
@@ -89,21 +89,21 @@ check_local_venv_creation() {
   test_venv_dir=$(mktemp -d)
   
   # Create a local venv
-  if ! python -m venv "${test_venv_dir}/test-venv" 2>&1; then
+  if ! python -m venv "${test_venv_dir}/test-venv"; then
     echo "Error: Failed to create local venv" >&2
     rm -rf "${test_venv_dir}"
     exit 1
   fi
   
   # Activate and install a package
-  if ! "${test_venv_dir}/test-venv/bin/pip" install --no-cache-dir requests 2>&1; then
+  if ! "${test_venv_dir}/test-venv/bin/pip" install --no-cache-dir requests; then
     echo "Error: Failed to install package in local venv" >&2
     rm -rf "${test_venv_dir}"
     exit 1
   fi
   
   # Verify the package works
-  if ! "${test_venv_dir}/test-venv/bin/python" -c "import requests" 2>&1; then
+  if ! "${test_venv_dir}/test-venv/bin/python" -c "import requests"; then
     echo "Error: Package installed in local venv but cannot be imported" >&2
     rm -rf "${test_venv_dir}"
     exit 1
