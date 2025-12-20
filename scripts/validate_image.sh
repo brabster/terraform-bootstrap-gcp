@@ -58,6 +58,61 @@ check_user_context() {
   echo "User checks passed."
 }
 
+# Verifies that Python package installation works in the global venv.
+# Tests installing a package to ensure permissions are correct.
+# Exits with a clear error message if check fails.
+check_python_package_installation() {
+  echo "--- Checking Python package installation in global venv ---"
+  
+  # Try to install a lightweight package to test permissions
+  if ! pip install --no-cache-dir cowsay 2>&1; then
+    echo "Error: Failed to install Python package in global venv" >&2
+    exit 1
+  fi
+  
+  # Verify the package was installed
+  if ! python -c "import cowsay" 2>&1; then
+    echo "Error: Package installed but cannot be imported" >&2
+    exit 1
+  fi
+  
+  echo "Python package installation in global venv works correctly."
+}
+
+# Verifies that creating and using a local virtual environment works.
+# Tests the common workflow of creating a venv and installing packages.
+# Exits with a clear error message if check fails.
+check_local_venv_creation() {
+  echo "--- Checking local venv creation and package installation ---"
+  
+  local test_venv_dir
+  test_venv_dir=$(mktemp -d)
+  
+  # Create a local venv
+  if ! python -m venv "${test_venv_dir}/test-venv" 2>&1; then
+    echo "Error: Failed to create local venv" >&2
+    rm -rf "${test_venv_dir}"
+    exit 1
+  fi
+  
+  # Activate and install a package
+  if ! "${test_venv_dir}/test-venv/bin/pip" install --no-cache-dir requests 2>&1; then
+    echo "Error: Failed to install package in local venv" >&2
+    rm -rf "${test_venv_dir}"
+    exit 1
+  fi
+  
+  # Verify the package works
+  if ! "${test_venv_dir}/test-venv/bin/python" -c "import requests" 2>&1; then
+    echo "Error: Package installed in local venv but cannot be imported" >&2
+    rm -rf "${test_venv_dir}"
+    exit 1
+  fi
+  
+  rm -rf "${test_venv_dir}"
+  echo "Local venv creation and package installation works correctly."
+}
+
 # The main entry point for the script.
 main() {
   echo "--- Checking Terraform ---"
@@ -75,6 +130,10 @@ main() {
   check_git_completion
 
   check_user_context
+
+  check_python_package_installation
+
+  check_local_venv_creation
 
   echo
   echo "All pre-flight checks passed successfully."

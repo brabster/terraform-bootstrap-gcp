@@ -63,7 +63,7 @@ RUN --mount=type=secret,id=proxy_cert,required=false \
     && /tmp/scripts/install_proxy_cert.sh "$([ -f /run/secrets/proxy_cert ] && echo /run/secrets/proxy_cert || echo '')" \
     && apt-get update \
     && apt-get -y upgrade \
-    && apt-get install -y --no-install-recommends gnupg lsb-release wget bash-completion git python3 ca-certificates \
+    && apt-get install -y --no-install-recommends gnupg lsb-release wget bash-completion git python3 python3-venv ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && /tmp/scripts/apt_install_thirdparty.sh "https://apt.releases.hashicorp.com/gpg" "terraform" "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
     && /tmp/scripts/apt_install_thirdparty.sh "https://packages.cloud.google.com/apt/doc/apt-key.gpg" "google-cloud-cli" "https://packages.cloud.google.com/apt cloud-sdk main" \
@@ -80,7 +80,8 @@ COPY --from=builder /opt/python-venv /opt/python-venv
 # Point gcloud tooling at venv python (instead of bundled python that was deleted above)
 ENV PATH="/opt/python-venv/bin:$PATH"
 ENV CLOUDSDK_PYTHON=/opt/python-venv/bin/python
-RUN ln -s /opt/python-venv/bin/python3 /usr/bin/python
+RUN ln -s /opt/python-venv/bin/python3 /usr/bin/python \
+    && chown -R 1000:1000 /opt/python-venv
 
 USER ubuntu
 

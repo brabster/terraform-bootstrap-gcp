@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - Fix Python package installation permissions
+
+### Added
+
+- Added python3-venv package to the final image runtime dependencies to enable users to create local virtual environments.
+- Added smoke tests in validate_image.sh to verify Python package installation works in both the global venv and local venvs.
+  - Test installing a package in the global venv to verify permissions are correct.
+  - Test creating a local venv and installing packages to verify the complete workflow.
+
+### Changed
+
+- Changed ownership of `/opt/python-venv` directory to ubuntu:ubuntu (UID/GID 1000:1000) to allow the ubuntu user to install packages.
+
+### Fixed
+
+- Fixed permission denied errors when users attempted to install Python packages in the global venv or create local virtual environments.
+
+### Rationale
+
+The Python virtual environment in `/opt/python-venv` was owned by root (created during the build), but the container runs as the ubuntu user. When users tried to install packages using pip or create new virtual environments, they encountered permission errors. This prevented the common workflow of creating project-specific virtual environments and installing dependencies.
+
+The fix ensures that the ubuntu user has full access to the Python virtual environment, enabling both:
+1. Installing packages directly into the global venv when needed
+2. Creating local virtual environments using `python -m venv` (requires python3-venv package)
+
+### Security
+
+- No change to security vulnerabilities or attack surface.
+- The ubuntu user (UID 1000) already had access to their home directory and could create virtual environments there. This change extends that capability to the global venv.
+- The python3-venv package is a minimal Python standard library component maintained by the Python Software Foundation (already a trusted maintainer in this project).
+
+  - **Security Posture Impact:** Neutral. This change fixes a usability issue without affecting the security posture. The ubuntu user is the intended runtime user for this image, and granting write access to the Python virtual environment aligns with the container's purpose as a development environment. The change does not introduce new attack vectors or vulnerable components.
+
 ## [[#62](https://github.com/brabster/terraform-bootstrap-gcp/pull/62)] - Test build process on PR instead of when merged
 
 ### Added
