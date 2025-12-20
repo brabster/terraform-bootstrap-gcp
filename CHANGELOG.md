@@ -23,11 +23,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Rationale
 
-The Python virtual environment in `/opt/python-venv` was owned by root (created during the build), but the container runs as the ubuntu user. When users tried to install packages using pip or create new virtual environments, they encountered permission errors. This prevented the common workflow of creating project-specific virtual environments and installing dependencies.
+The Python installation in `/opt/python-venv` is technically a virtual environment (created during the image build). The container's python command points to this venv, which means `sys.prefix != sys.base_prefix`. 
 
-The fix ensures that the ubuntu user has full access to the Python virtual environment, enabling both:
-1. Installing packages directly into the global venv when needed
-2. Creating local virtual environments using `python -m venv` (requires python3-venv package)
+When users run scripts that check whether they're already in a venv using this comparison, Python reports True. Some initialization scripts (like the one in the issue) then skip creating a new local venv and try to install packages directly into the detected venv at `/opt/python-venv`. If this directory is owned by root while the container runs as the ubuntu user, pip fails with permission errors.
+
+The issue manifested as:
+```
+ERROR: Could not install packages due to an OSError: [Errno 13] Permission denied: '/opt/python-venv/lib/python3.12/site-packages/text_unidecode'
+```
+
+The fix changes ownership of `/opt/python-venv` to ubuntu:ubuntu, enabling two workflows:
+1. Installing packages directly into the global venv (when scripts detect the existing venv)
+2. Creating new local virtual environments using `python -m venv` (requires python3-venv package)
 
 ### Security
 
