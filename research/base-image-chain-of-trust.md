@@ -39,7 +39,9 @@ When installing Ubuntu from an ISO image, users can verify:
 2. **Key verification**: Canonical's signing keys are distributed through the Ubuntu keyserver and documented
 3. **Manual verification**: Users can verify the signature before installation using:
    ```bash
-   gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 0x46181433FBB75451 0xD94AA3F0EFE21092
+   # Fetch Canonical signing keys (see Ubuntu documentation for current key IDs):
+   # https://ubuntu.com/tutorials/how-to-verify-ubuntu#1-overview
+   gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys "<CANONICAL_RELEASE_KEY_ID_1>" "<CANONICAL_RELEASE_KEY_ID_2>"
    gpg --verify SHA256SUMS.gpg SHA256SUMS
    sha256sum -c SHA256SUMS
    ```
