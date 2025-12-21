@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Current PR] - Add OpenSSF Security Insights specification file
+
+### Added
+
+- Added `SECURITY-INSIGHTS.yml` file following the OpenSSF Security Insights Specification v1.0.0
+- Documented all required sections: header, project lifecycle, contribution policy, distribution points, security artifacts, security testing, security contacts, and vulnerability reporting
+- Listed OSV Scanner as the primary security testing tool with SCA (Software Composition Analysis) integration in CI
+- Specified GitHub Container Registry (ghcr.io) as the distribution point using Package URL (pURL) format
+- Documented continuous deployment release process with daily builds and vulnerability scanning
+
+### Rationale
+
+The OpenSSF Security Insights specification provides a standardised, machine-processable format for communicating security information about open source projects. This file makes it easier for security researchers, adopters, and automated tools to understand the project's security posture, practices, and contact methods.
+
+By adopting this specification, the project demonstrates transparency in security practices and makes it easier for consumers to evaluate security maturity. The file serves as a centralised reference for security-relevant information that was previously scattered across multiple documents.
+
+### Security
+
+- No change to code, dependencies, or container image security
+- Improves security transparency by providing structured security information
+- Makes security practices discoverable to automated security assessment tools
+- Documents existing security controls (OSV scanning, attestations, vulnerability reporting)
+- Facilitates security evaluation by project adopters and security researchers
+
+  - **Security Posture Impact:** Positive. This change improves the project's security transparency without modifying any code or dependencies. By documenting security practices in a machine-processable format, the project enables automated security assessment tools to evaluate its security posture more effectively. The file provides clear information about vulnerability reporting procedures, security testing practices, and supply chain security measures. This transparency helps potential adopters make informed decisions and helps security researchers understand how to responsibly disclose vulnerabilities. The standardised format aligns with OpenSSF best practices and demonstrates commitment to security transparency.
+
 ## [[#66](https://github.com/brabster/terraform-bootstrap-gcp/pull/66)] - Replace global venv with system pip to eliminate venv detection issues
 
 ### Added

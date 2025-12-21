@@ -1,0 +1,85 @@
+# Security Insights
+#
+# This file provides machine-processable security information about this project
+# following the OpenSSF Security Insights Specification v1.0.0
+# https://github.com/ossf/security-insights-spec
+
+header:
+  schema-version: 1.0.0
+  expiration-date: '2026-12-21T15:06:44.000Z'
+  last-updated: '2025-12-21'
+  last-reviewed: '2025-12-21'
+  commit-hash: 2b6b82472778275713d0fa3abdccf0408608bf8f
+  project-url: https://github.com/brabster/terraform-bootstrap-gcp
+  changelog: https://github.com/brabster/terraform-bootstrap-gcp/blob/main/CHANGELOG.md
+  license: https://github.com/brabster/terraform-bootstrap-gcp/blob/main/LICENSE
+
+project-lifecycle:
+  status: active
+  bug-fixes-only: false
+  core-maintainers:
+    - https://github.com/brabster
+  release-process: |
+    The project uses continuous deployment. Images are built, tested, scanned for vulnerabilities,
+    and published to GitHub Container Registry daily (4am UTC), on every push to the main branch,
+    and on every pull request. Each build includes automated security scanning with OSV Scanner
+    and attestation generation for supply chain verification. Pull requests receive temporary
+    tags for testing before merge.
+
+contribution-policy:
+  accepts-pull-requests: true
+  accepts-automated-pull-requests: true
+  automated-tools-list:
+    - automated-tool: dependabot
+      action: allowed
+      comment: |
+        Dependabot PRs are welcome for security updates and dependency upgrades
+    - automated-tool: copilot
+      action: allowed
+      comment: |
+        GitHub Copilot is used for code suggestions and automated improvements
+
+distribution-points:
+  - pkg:oci/terraform-bootstrap-gcp?repository_url=ghcr.io/brabster
+
+security-artifacts:
+  threat-model:
+    threat-model-created: false
+    comment: |
+      No formal threat model exists. The project's security approach is documented in
+      README.md (supply chain security section) and focuses on: minimal dependencies,
+      automatic updates, rolling versions for security patches, cryptographic attestations,
+      and daily vulnerability scanning with OSV Scanner.
+  self-assessment:
+    self-assessment-created: false
+    comment: |
+      No formal security self-assessment exists. Security practices are documented
+      throughout the codebase and README.md including supply chain security measures,
+      vulnerability scanning, and attestation verification procedures.
+
+security-testing:
+  - tool-type: sca
+    tool-name: OSV Scanner
+    tool-url: https://github.com/brabster/terraform-bootstrap-gcp/blob/main/.github/workflows/docker-publish.yml
+    integration:
+      ad-hoc: false
+      ci: true
+      before-release: true
+    comment: |
+      OSV Scanner scans the container image for known vulnerabilities in all dependencies.
+      Results are uploaded to GitHub Code Scanning for tracking. The scan runs on every
+      build and blocks publishing if critical vulnerabilities are found.
+
+security-contacts:
+  - type: website
+    value: https://github.com/brabster/terraform-bootstrap-gcp/security/advisories/new
+    primary: true
+
+vulnerability-reporting:
+  accepts-vulnerability-reports: true
+  security-policy: https://github.com/brabster/terraform-bootstrap-gcp/blob/main/SECURITY.md
+  bug-bounty-available: false
+  comment: |
+    Use GitHub's private security advisory feature to report vulnerabilities.
+    Only vulnerabilities related to the setup of this project can be actioned.
+    The maintainer provides no assurance of support.
