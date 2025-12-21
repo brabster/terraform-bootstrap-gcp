@@ -17,6 +17,24 @@ It is designed for temporary development environments, including:
 
 The base image is `ubuntu:latest`. This tag provides the latest LTS release and is updated automatically when new LTS versions are released. LTS releases receive the same security updates as other Ubuntu releases. This choice avoids compatibility issues with third-party package repositories that may not immediately support newly released Ubuntu versions.
 
+### Trust model
+
+The base image trust model relies on infrastructure trust rather than cryptographic signature verification. When pulling ubuntu:latest from Docker Hub:
+
+- **Content integrity**: SHA256 digests verify content was not modified in transit
+- **Infrastructure trust**: Relies on Docker Hub and Canonical's infrastructure security
+- **No signature verification**: Docker does not verify cryptographic signatures by default
+
+This provides weaker trust guarantees than installing Ubuntu from a GPG-signed ISO image. However, practical alternatives (digest pinning, alternative registries, building from source) conflict with project principles of simplicity and automatic security updates.
+
+The project accepts this limitation because:
+- Canonical does not currently provide cryptographically signed container images
+- Alternative base images lack Ubuntu compatibility or add significant complexity
+- Daily rebuilds ensure latest security updates are incorporated promptly
+- The attestations this project generates provide downstream verification for our build process
+
+For a detailed analysis of the base image chain of trust, including comparison with ISO installation and evaluation of alternatives, see [research/base-image-chain-of-trust.md](research/base-image-chain-of-trust.md).
+
 ## Dependencies
 
 This image relies on the following direct dependencies. Maintainers of these dependencies are responsible for their transitive dependencies. The latest versions are installed when the image is built.

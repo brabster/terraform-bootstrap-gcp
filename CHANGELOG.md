@@ -4,6 +4,84 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - Document base image chain of trust analysis
+
+### Added
+
+- Comprehensive research document at `research/base-image-chain-of-trust.md` analysing the chain of trust for the Docker base image
+- Trust model section in README documenting base image verification limitations
+- Analysis comparing Docker Hub ubuntu:latest trust model with Ubuntu ISO installation
+- Evaluation of alternative base images (Canonical OCI registry, Distroless, Chainguard, building from source)
+- Documentation of why cryptographic signature verification is not currently possible
+- Recommendations for ongoing monitoring of container attestation ecosystem
+
+### Changed
+
+- README now explicitly documents that the base image relies on infrastructure trust rather than cryptographic verification
+- README clarifies that this provides weaker trust guarantees than ISO installation but aligns with project principles
+
+### Rationale
+
+Maintainers need to understand the security trade-offs in the base image supply chain to make informed decisions and communicate honestly with users. The Docker Hub ubuntu:latest image lacks the cryptographic signature verification available when installing Ubuntu from a GPG-signed ISO image.
+
+This analysis documents:
+1. The trust gap between Docker Hub images and ISO installation
+2. Why alternatives (digest pinning, alternative registries, building from scratch) conflict with project principles
+3. That Canonical does not currently provide signed container images or attestations
+4. The conscious decision to accept infrastructure trust in exchange for simplicity and automatic updates
+
+The research document provides a complete analysis for future reference, while the README update makes the trust model immediately visible to users.
+
+### Security
+
+#### Chain of Trust Analysis
+
+The ubuntu:latest base image from Docker Hub provides weaker trust guarantees than installing from a GPG-signed Ubuntu ISO because:
+
+1. **No signature verification**: Docker pull does not verify cryptographic signatures by default
+2. **Infrastructure trust only**: Relies on Docker Hub and Canonical infrastructure security
+3. **No attestations**: The image lacks SLSA provenance or Sigstore attestations
+4. **No user verification**: Users cannot independently verify image authenticity
+
+Compare with ISO installation:
+- ISO: SHA256SUMS.gpg signed by Canonical's GPG keys, user-verifiable
+- Docker: Content integrity via digests only, no signature verification
+
+#### Why Improvements Are Limited
+
+Potential improvements were evaluated but are not feasible:
+
+1. **Digest pinning**: Conflicts with automatic security updates principle
+2. **Alternative registries**: Canonical does not provide signed images elsewhere
+3. **Alternative base images**: Lack Ubuntu compatibility or add significant complexity
+4. **Building from source**: Conflicts with simplicity principle and adds maintenance burden
+5. **Signature verification**: No signatures exist to verify
+
+#### Supply Chain Posture Impact
+
+This documentation change makes the trust limitation transparent but does not change the actual security posture:
+
+- **Before**: Relied on Docker Hub infrastructure trust (undocumented)
+- **After**: Relies on Docker Hub infrastructure trust (documented and analysed)
+
+The security impact is **neutral** in terms of technical controls but **positive** for transparency:
+
+- Users can make informed decisions about whether to use this image
+- The trade-off between simplicity and cryptographic verification is explicit
+- Future improvements can be tracked as the container ecosystem evolves
+- Downstream verification is provided through this project's own attestations
+
+#### Security Posture Impact
+
+**Neutral to slightly positive.** This change does not modify the container image or build process, so the runtime security posture is unchanged. However, it improves security transparency by documenting:
+
+1. The trust model for the base image
+2. The comparison with ISO installation verification
+3. Why stronger verification is not currently possible
+4. What users should consider when using this image
+
+The honest assessment of trust limitations helps users make informed security decisions. The analysis demonstrates due diligence in evaluating alternatives and provides a framework for re-evaluation if the container ecosystem improves.
+
 ## [[#66](https://github.com/brabster/terraform-bootstrap-gcp/pull/66)] - Replace global venv with system pip to eliminate venv detection issues
 
 ### Added
