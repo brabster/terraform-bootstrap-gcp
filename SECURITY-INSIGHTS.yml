@@ -40,7 +40,8 @@ contribution-policy:
         GitHub Copilot is used for code suggestions and automated improvements
 
 distribution-points:
-  - pkg:oci/terraform-bootstrap-gcp?repository_url=ghcr.io/brabster
+  - https://github.com/brabster/terraform-bootstrap-gcp/pkgs/container/terraform-bootstrap-gcp
+  - pkg:docker/brabster/terraform-bootstrap-gcp@latest?repository_url=ghcr.io
 
 security-artifacts:
   threat-model:
