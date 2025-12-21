@@ -1,5 +1,9 @@
 # syntax=docker/dockerfile:1
 
+# Base image: ubuntu:latest from Docker Hub (Canonical)
+# Trust model: Relies on Docker Hub infrastructure trust and content integrity via SHA256 digests.
+# No cryptographic signature verification is available for this image.
+# See research/base-image-chain-of-trust.md for detailed analysis.
 FROM docker.io/ubuntu:latest
 
 ARG BUILD_DATE
