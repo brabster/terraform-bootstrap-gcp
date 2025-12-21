@@ -41,7 +41,7 @@ contribution-policy:
 
 distribution-points:
   - https://github.com/brabster/terraform-bootstrap-gcp/pkgs/container/terraform-bootstrap-gcp
-  - pkg:docker/brabster/terraform-bootstrap-gcp@latest?repository_url=ghcr.io
+  - pkg:docker/ghcr.io/brabster/terraform-bootstrap-gcp@latest
 
 security-artifacts:
   threat-model:
