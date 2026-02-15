@@ -4,7 +4,68 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - Fix test-osv-scanner job failure
+## [[#74](https://github.com/brabster/terraform-bootstrap-gcp/pull/74)] - Fix vulnerability comparison pipeline for multi-platform images
+
+### Changed
+
+- Modified scan_image.sh to build local wrapper images before scanning
+- Added docker build step with `--platform linux/amd64` flag to create scannable images
+- Added inline documentation explaining the multi-platform image issue and solution
+
+### Fixed
+
+- Resolved vulnerability comparison pipeline failure: "failed to load image from tarball: file blobs/sha256/... not found in tar"
+- All matrix images (ubuntu, python, terraform, etc.) now scan successfully
+
+### Rationale
+
+The vulnerability comparison pipeline was failing with the same multi-platform image issue that affected the test-osv-scanner job (fixed in [#72](https://github.com/brabster/terraform-bootstrap-gcp/pull/72)).
+
+The vulnerability comparison pipeline scans various base images from Docker Hub to compare their security postures. Unlike the test job which only needed to validate the wrapper script, this pipeline requires scanning actual production images to provide meaningful comparisons.
+
+The solution builds a local wrapper image for each target image using `FROM <target_image>` before scanning. This approach:
+
+1. Preserves the exact content and vulnerabilities of the original image
+2. Avoids the Docker v29 multi-platform image export issue
+3. Maintains the pipeline's purpose of comparing real-world base images
+4. Uses the same workaround pattern as the test job fix (building local images)
+
+When Docker builds an image locally (even a simple wrapper), it stores all necessary blobs in a format that `docker save` can export completely, avoiding the incomplete blob content issue that affects pulled multi-platform images.
+
+### Security
+
+#### Root Cause
+
+The failure occurred due to the same Docker v29 multi-platform image incompatibility documented in the previous entry:
+
+1. **Docker v29 behavior change** ([moby/moby#51779](https://github.com/moby/moby/issues/51779)): Pulls all architecture variants by default
+2. **Incomplete OCI archives** ([moby/moby#49473](https://github.com/moby/moby/issues/49473)): `docker save` exports incomplete blob content for multi-platform images
+3. **osv-scanner dependency**: Expects complete OCI archives with all referenced blobs
+
+The scan_image.sh script pulls images from Docker Hub and passes them to osv-scanner, which internally calls `docker save`. This triggered the incomplete blob export issue for all multi-platform images in the matrix.
+
+#### Supply Chain Posture Impact
+
+Building wrapper images introduces an additional build step, but does not change the supply chain:
+
+- The source images still come from their original trusted registries (Docker Hub, GCR, etc.)
+- No new dependencies are added
+- The wrapper build uses only the existing Docker build capability
+- The scan still analyzes the exact same packages and vulnerabilities from the source image
+
+The wrapper image is ephemeral and never published - it exists only to work around the Docker v29 export limitation.
+
+#### Security Posture Impact
+
+**Positive.** This change:
+- Restores the ability to scan and compare vulnerabilities across base images
+- Re-enables automated vulnerability monitoring for production base image candidates
+- Provides security intelligence that informs base image selection decisions
+- Does not modify the content being scanned (only the scanning mechanism)
+
+The vulnerability comparison pipeline is a security monitoring tool. Fixing it improves security posture by restoring visibility into base image vulnerabilities.
+
+## [[#72](https://github.com/brabster/terraform-bootstrap-gcp/pull/72)] - Fix test-osv-scanner job failure
 
 ### Changed
 
