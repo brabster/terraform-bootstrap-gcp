@@ -22,7 +22,6 @@ SIZE=$(docker images --format "{{.Size}}" "$IMAGE")
 # Building a local wrapper image ensures all necessary blobs are included.
 LOCAL_IMAGE="${SANITIZED_IMAGE_NAME}-local:scan"
 echo "FROM ${IMAGE}" | docker build --platform linux/amd64 -t "$LOCAL_IMAGE" -
-LOCAL_SIZE=$(docker images --format "{{.Size}}" "$LOCAL_IMAGE")
 
 # Scan the local wrapper image and deduplicate results
 "$(dirname "$0")/../scripts/run_osv_scanner.sh" scan image --format sarif --output "$SCAN_OUTPUT_RAW_FILENAME" "$LOCAL_IMAGE"
