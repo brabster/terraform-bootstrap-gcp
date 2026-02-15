@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - Fix vulnerability comparison pipeline for multi-platform images
+## [[#74](https://github.com/brabster/terraform-bootstrap-gcp/pull/74)] - Fix vulnerability comparison pipeline for multi-platform images
 
 ### Changed
 
@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Rationale
 
-The vulnerability comparison pipeline was failing with the same multi-platform image issue that affected the test-osv-scanner job (see issue in previous entry).
+The vulnerability comparison pipeline was failing with the same multi-platform image issue that affected the test-osv-scanner job (fixed in [#72](https://github.com/brabster/terraform-bootstrap-gcp/pull/72)).
 
 The vulnerability comparison pipeline scans various base images from Docker Hub to compare their security postures. Unlike the test job which only needed to validate the wrapper script, this pipeline requires scanning actual production images to provide meaningful comparisons.
 
@@ -65,7 +65,7 @@ The wrapper image is ephemeral and never published - it exists only to work arou
 
 The vulnerability comparison pipeline is a security monitoring tool. Fixing it improves security posture by restoring visibility into base image vulnerabilities.
 
-## [Unreleased] - Fix test-osv-scanner job failure
+## [[#72](https://github.com/brabster/terraform-bootstrap-gcp/pull/72)] - Fix test-osv-scanner job failure
 
 ### Changed
 
