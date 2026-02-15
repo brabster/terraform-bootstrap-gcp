@@ -19,7 +19,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Rationale
 
-The test_osv_scanner_wrapper job was failing when osv-scanner internally called `docker save` on multi-platform images pulled from Docker Hub. Recent Docker versions (29.1.5+) save these images in OCI format with incomplete blob content—the tarball includes manifest references but not all referenced blobs (specifically config blobs). This causes osv-scanner to fail when trying to read the missing blobs.
+The test_osv_scanner_wrapper job was failing when osv-scanner internally called `docker save` on multi-platform images pulled from Docker Hub.
+
+Starting with Docker v29, the default behavior changed to pull all architecture variants of multi-arch images, not just the host architecture (see [moby/moby#51779](https://github.com/moby/moby/issues/51779)). When `docker save` exports these multi-platform images to OCI format, the resulting tarball can have incomplete blob content—manifest references exist but not all referenced blobs are included in the archive. This is a known issue tracked in [moby/moby#49473](https://github.com/moby/moby/issues/49473).
+
+Specifically, the OCI image index references platform-specific manifests, which in turn reference config blobs and layer blobs. However, `docker save` does not always include all these referenced blobs in the exported tarball for multi-platform images, causing tools like osv-scanner to fail with "file blobs/sha256/[hash] not found in tar" errors.
 
 Locally built images do not have this issue because Docker includes all necessary blobs when saving images that were built locally. The fix maintains test coverage of the osv-scanner wrapper script while avoiding the multi-platform image limitation entirely.
 
@@ -29,12 +33,17 @@ This change only affects the test job. The main osv_scan job continues to work c
 
 #### Root Cause
 
-The failure occurred due to an incompatibility between:
-- osv-scanner 2.3.3 (released Feb 12, 2026) 
-- Docker 29.1.5+ OCI image format for multi-platform images
-- Incomplete blob content when `docker save` exports pulled multi-platform images
+The failure occurred due to an incompatibility between osv-scanner and Docker v29's handling of multi-platform images:
 
-The osv-scanner wrapper script itself has no security vulnerabilities. The issue is purely with how osv-scanner handles multi-platform image archives from Docker Hub.
+1. **Docker v29 behavior change** ([moby/moby#51779](https://github.com/moby/moby/issues/51779)): Docker v29+ pulls all architecture variants of multi-arch images by default, not just the host architecture. This increases disk usage and changes image semantics.
+
+2. **Incomplete OCI archives** ([moby/moby#49473](https://github.com/moby/moby/issues/49473)): When `docker save` exports multi-platform images, the resulting OCI tarball can have incomplete blob content. The image index and manifests are included, but not all referenced blobs (particularly config blobs) are exported.
+
+3. **osv-scanner dependency**: osv-scanner 2.3.3 internally calls `docker save` when scanning images, then expects a complete OCI archive with all referenced blobs present.
+
+The combination of these factors causes osv-scanner to fail with "file blobs/sha256/[hash] not found in tar" when scanning pulled multi-platform images.
+
+The osv-scanner wrapper script itself has no security vulnerabilities. The issue is purely with Docker v29's incomplete export of multi-platform image archives.
 
 #### Security Posture Impact
 

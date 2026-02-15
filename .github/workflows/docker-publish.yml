@@ -147,9 +147,11 @@ jobs:
         run: |
           echo "FROM alpine:latest" | docker build -t test-image:local -
           # Use a locally built image to avoid issues with multi-platform images from Docker Hub.
-          # Multi-platform images pulled from registries can have incomplete blob content in the
-          # OCI archive format, which causes osv-scanner to fail with "file not found in tar" errors.
-          # This is a known limitation when osv-scanner internally calls docker save on pulled images.
+          # Docker v29+ changed to pull all architecture variants by default (moby/moby#51779).
+          # When docker save exports these multi-arch images, the OCI archive can have incomplete
+          # blob content - manifest references exist but not all referenced blobs are included.
+          # This causes osv-scanner to fail with "file not found in tar" errors (moby/moby#49473).
+          # Locally built images include all necessary blobs and work correctly.
 
       - name: Test wrapper script with a valid image
         run: scripts/run_osv_scanner.sh scan image test-image:local
