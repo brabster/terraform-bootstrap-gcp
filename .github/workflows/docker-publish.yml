@@ -150,7 +150,6 @@ jobs:
           # Multi-platform images pulled from registries can have incomplete blob content in the
           # OCI archive format, which causes osv-scanner to fail with "file not found in tar" errors.
           # This is a known limitation when osv-scanner internally calls docker save on pulled images.
-          # See: https://github.com/google/osv-scanner/issues
 
       - name: Test wrapper script with a valid image
         run: scripts/run_osv_scanner.sh scan image test-image:local
