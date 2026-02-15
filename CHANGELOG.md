@@ -4,6 +4,48 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - Fix test-osv-scanner job failure
+
+### Changed
+
+- Modified test_osv_scanner_wrapper job to build a local test image instead of pulling ubuntu:latest from Docker Hub
+- Replaced `docker pull ubuntu:latest` with `echo "FROM alpine:latest" | docker build -t test-image:local -`
+- Added inline documentation explaining the multi-platform image limitation
+
+### Fixed
+
+- Resolved osv-scanner failure: "failed to load image from tarball: file blobs/sha256/... not found in tar"
+- Test now passes consistently without changing the wrapper script's functionality
+
+### Rationale
+
+The test_osv_scanner_wrapper job was failing when osv-scanner internally called `docker save` on multi-platform images pulled from Docker Hub. Recent Docker versions (29.1.5+) save these images in OCI format with incomplete blob content—the tarball includes manifest references but not all referenced blobs (specifically config blobs). This causes osv-scanner to fail when trying to read the missing blobs.
+
+Locally built images do not have this issue because Docker includes all necessary blobs when saving images that were built locally. The fix maintains test coverage of the osv-scanner wrapper script while avoiding the multi-platform image limitation entirely.
+
+This change only affects the test job. The main osv_scan job continues to work correctly because it scans the locally built candidate_image.
+
+### Security
+
+#### Root Cause
+
+The failure occurred due to an incompatibility between:
+- osv-scanner 2.3.3 (released Feb 12, 2026) 
+- Docker 29.1.5+ OCI image format for multi-platform images
+- Incomplete blob content when `docker save` exports pulled multi-platform images
+
+The osv-scanner wrapper script itself has no security vulnerabilities. The issue is purely with how osv-scanner handles multi-platform image archives from Docker Hub.
+
+#### Security Posture Impact
+
+**Neutral.** This change:
+- Does not modify the osv-scanner wrapper script's security handling
+- Does not change how vulnerabilities are detected in production images
+- Only affects which test image is used to validate the wrapper script
+- Maintains equivalent test coverage with a different base image (alpine instead of ubuntu)
+
+The main osv_scan job that scans the actual candidate_image for production use is unaffected and continues to provide the same security scanning coverage.
+
 ## [Unreleased] - Document base image chain of trust analysis
 
 ### Added
